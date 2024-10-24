@@ -10,16 +10,30 @@
     <meta http-equiv="pragma" content="no-cache" />
     <title>Read JSON File</title>
     <script type="text/javascript" src="read_bus_stops.js"></script>
+     <link rel="stylesheet" href="read_bus_stops.css">
 </head>
 
 <body>
-    <button type="button" onclick="fetchJSONData()">Click Me!</button>
-    <button type="button" onclick="zoom()">+</button>
-    <button type="button" onclick="unzoom()">-</button>
-    <button type="button" onclick="right()">-></button>
-    <button type="button" onclick="left()"><-</button>
-    <button type="button" onclick="up()">^</button>
-    <button type="button" onclick="down()">v</button>
-    <canvas id="myCanvas" width="500" height="500" style="border:1px solid black;">
-    </canvas>
+    <div class="container">
+        <button type="button" class="btn2 second_raw_center" onclick="fetchJSONData()">Click Me!</button>
+        <button type="button" class="btn2 second_raw_left" onclick="unzoom()">-</button>
+        <button type="button" class="btn2 second_raw_right" onclick="zoom()">+</button>
+        <button type="button" class="btn right-btn" onclick="right()">-></button>
+        <button type="button" class="btn left-btn" onclick="left()"><-</button>
+        <button type="button" class="btn top-btn" onclick="up()">^</button>
+        <button type="button" class="btn bottom-btn" onclick="down()">v</button>
+        <canvas id="myCanvas" class="canvas" height="500" width="500"></canvas>
+        <script>
+            function getDisplayRatio() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                const ratio = (width / height).toFixed(2); // Mantiene 2 cifre decimali
+                console.log(ratio)
+                const inputBox = document.getElementById("myCanvas");
+                inputBox.setAttribute("width", String(500*ratio));
+            }
+            getDisplayRatio();
+            window.addEventListener('resize', getDisplayRatio);
+        </script>
+    </div>
 </body>

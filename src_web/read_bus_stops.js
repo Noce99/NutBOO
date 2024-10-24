@@ -39,21 +39,21 @@ function unzoom(){
 }
 
 function right(){
-    translation_x -= 10;
+    translation_x -= 40;
     fetchJSONData();
 }
 
 function left(){
-    translation_x += 10;
+    translation_x += 40;
     fetchJSONData();
 }
 
 function up(){
-    translation_y += 10;
+    translation_y += 40;
     fetchJSONData();
 }
 
 function down(){
-    translation_y -= 10;
+    translation_y -= 40;
     fetchJSONData();
 }

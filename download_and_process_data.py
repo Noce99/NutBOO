@@ -43,13 +43,24 @@ if __name__ == "__main__":
     if not os.path.exists(processed_data):
         os.mkdir(processed_data)
 
-    # Let's Process the data that I will use
+    # Let's Process bus_stops
     with open(os.path.join(original_data, "bus_stops.csv"), mode='r') as infile:
         csvFile = csv.reader(infile, delimiter=';')
         csvFile.__next__()
         bus_stops = [{"name": bus_stop[1], "verbal_location": bus_stop[2],
                       "x": int(bus_stop[4]), "y": int(bus_stop[5]), "zone_code": bus_stop[8]}
                      for bus_stop in csvFile]
+
+        x_tot = 0
+        y_tot = 0
+        for el in bus_stops:
+            x_tot += el["x"]
+            y_tot += el["y"]
+        x_mean = x_tot / len(bus_stops)
+        y_mean = y_tot / len(bus_stops)
+        for el in bus_stops:
+            el["x"] -= x_mean
+            el["y"] -= y_mean
 
         # Writing to sample.json
         with open(os.path.join(processed_data, "bus_stops.json"), "w") as outfile:
