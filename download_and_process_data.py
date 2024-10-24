@@ -1,6 +1,8 @@
 import os
 import pathlib
 import requests
+import csv
+import json
 
 
 if __name__ == "__main__":
@@ -25,13 +27,30 @@ if __name__ == "__main__":
     dataset_path = os.path.join(current_path, "datasets")
     if not os.path.exists(dataset_path):
         os.mkdir(dataset_path)
-    # Let's create the csv folder
-    csv_path = os.path.join(dataset_path, "original_data")
-    if not os.path.exists(csv_path):
-        os.mkdir(csv_path)
+    # Let's create the original_data folder
+    original_data = os.path.join(dataset_path, "original_data")
+    if not os.path.exists(original_data):
+        os.mkdir(original_data)
 
     # Let's download everything
     for filename, url in urls.items():
         response = requests.get(url)
-        with open(os.path.join(csv_path, filename), "wb") as file:
+        with open(os.path.join(original_data, filename), "wb") as file:
             file.write(response.content)
+
+    # Let's create the processed_data folder
+    processed_data = os.path.join(dataset_path, "processed_data")
+    if not os.path.exists(processed_data):
+        os.mkdir(processed_data)
+
+    # Let's Process the data that I will use
+    with open(os.path.join(original_data, "bus_stops.csv"), mode='r') as infile:
+        csvFile = csv.reader(infile, delimiter=';')
+        csvFile.__next__()
+        bus_stops = [{"name": bus_stop[1], "verbal_location": bus_stop[2],
+                      "x": int(bus_stop[4]), "y": int(bus_stop[5]), "zone_code": bus_stop[8]}
+                     for bus_stop in csvFile]
+
+        # Writing to sample.json
+        with open(os.path.join(processed_data, "bus_stops.json"), "w") as outfile:
+            json.dump(bus_stops, outfile)

@@ -8,7 +8,7 @@ function fetchJSONData() {
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
     ctx.fillStyle = "red";
-    fetch("bus_stops_normalized.json").then((res) => {
+    fetch("data/bus_stops.json").then((res) => {
         if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
         }
