@@ -44,7 +44,7 @@ function draw_data(){
     ctx.moveTo(canvas.width/2, canvas.height/2-0.01*canvas.height);
     ctx.lineTo(canvas.width/2, canvas.height/2+0.01*canvas.height);
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 1;
     ctx.stroke();
 }
 

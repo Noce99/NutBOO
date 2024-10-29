@@ -48,22 +48,16 @@ canvas {
   bottom: 10%;
   left: 10%;
   height: 10%;
-  width: 20%;
+  width: 40%;
 }
 
 .second_raw_right {
   bottom: 10%;
   right: 10%;
   height: 10%;
-  width: 20%;
-}
-
-.second_raw_center {
-  bottom: 10%;
-  right: 30%;
-  height: 10%;
   width: 40%;
 }
+
 
 .top-btn {
   top: 0;
