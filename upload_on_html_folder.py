@@ -51,7 +51,8 @@ if __name__ == "__main__":
     for el in data_files:
         full_path = os.path.abspath(os.path.join(processed_data_folder, el))
         try:
-            os.link(full_path, os.path.join(nut_bus_www_folder, "data", el))
+            if not os.path.isdir(os.path.join(processed_data_folder, el)):
+                os.link(full_path, os.path.join(nut_bus_www_folder, "data", el))
         except OSError as e:
             if e.errno == errno.EEXIST:
                 print(os.path.join(nut_bus_www_folder, "data", el) + " is already there.")

@@ -5,3 +5,5 @@ pyvenv.cfg
 datasets/
 .idea/
 include/
+
+__pycache__

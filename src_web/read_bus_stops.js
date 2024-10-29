@@ -23,8 +23,13 @@ function fetchJSONData() {
 function draw_data(data){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i=0; i < data.length; i++) {
-       ctx.fillRect(parseInt(data[i].x)/zoom_value + translation_x,
-           parseInt(data[i].y)/zoom_value + translation_y, 5, 5);
+        ctx.beginPath();
+        ctx.arc(parseInt(data[i].x)/zoom_value + translation_x,
+                parseInt(data[i].y)/zoom_value + translation_y,
+            2, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,0,0,1.0)';
+        ctx.fill();
     }
 }
 

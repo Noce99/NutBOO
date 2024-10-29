@@ -1,13 +1,14 @@
 import os
 import pathlib
 import requests
-import csv
-import json
 
 import urllib.request
 from bs4 import BeautifulSoup
+from tqdm import tqdm
+import zipfile
 
-version = "20241101"
+from process_functions import process_bus_stops
+
 
 if __name__ == "__main__":
 
@@ -37,82 +38,68 @@ if __name__ == "__main__":
         for e in soup.find_all("a"):
             if "id" in e.attrs.keys() and "ContentPlaceHolderMain_hlnkFormatoCsv" in e["id"]:
                 files_containing_tper_data[element]["download_link"] = e["href"]
-        if "download_link" not in files_containing_tper_data[element].keys():
-            print(my_html_as_str)
-            if "id" in e.attrs.keys() and "hlnkFormatoGtfs" in e["id"]:
-                print("aaa")
-                files_containing_tper_data[element]["download_link"] = e["href"]
+                files_containing_tper_data[element]["file_extension"] = ".csv"
+            if "download_link" not in files_containing_tper_data[element].keys():
+                if "id" in e.attrs.keys() and "ContentPlaceHolderMain_hlnkFormatoGtfs" in e["id"]:
+                    files_containing_tper_data[element]["download_link"] = e["href"]
+                    files_containing_tper_data[element]["file_extension"] = ".zip"
         if "download_link" not in files_containing_tper_data[element].keys():
             print(f"Not able to find! {files_containing_tper_data[element]['file_name']}")
         
     print(files_containing_tper_data)
-        # print("@"*150)
-    exit()
-    
-    
-    urls = {
-        "list_of_the_file.csv": "https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=opendata-versione&version=1&format=csv",
-        "ticket_seller.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=rivendite&version={version}&format=csv",
-        "areas.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=zone&version={version}&format=csv",
-        "cities.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=localitazone&version={version}&format=csv",
-        "train_lines.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=lineeferroviarie&version={version}&format=csv",
-        "train_stations.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=stazioniferroviarie&version={version}&format=csv",
-        "arcs_buses.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=archi&version={version}&format=csv",
-        "bus_stops.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=fermate&version={version}&format=csv",
-        "bus_numbers.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=linee&version={version}&format=csv",
-        
-        "bus_numbers_arcs_connection.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=lineepercorsi&version={version}&format=csv",
-        "bus_numbers_stops_connection.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=lineefermate&version={version}&format=csv",
-        "bus_bologna_gtfs.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=gommagtfsbo&version=20241018&format=zip",
-        "bus_ferrara_gtfs.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=gommagtfsfe&version=20241018&format=zip",
-        "people_mover_gtfs.csv": f"https://solweb.tper.it/web/tools/open-data/open-data-download.aspx?source=solweb.tper.it&filename=gtfsmex&version=20240115&format=zip",
-    }
+
     # Let's create the dataset folder
     current_path = pathlib.Path(__file__).parent.resolve()
     dataset_path = os.path.join(current_path, "datasets")
     if not os.path.exists(dataset_path):
         os.mkdir(dataset_path)
+
     # Let's create the original_data folder
     original_data = os.path.join(dataset_path, "original_data")
     if not os.path.exists(original_data):
         os.mkdir(original_data)
 
     # Let's download everything
-    for file_to_download in files_containing_tper_data:
-        response = requests.get(f"")
-        with open(os.path.join(original_data, file_to_download["file_name"]), "wb") as file:
+    list_of_original_data_path = []
+    for file_to_download in tqdm(files_containing_tper_data):
+        url_end = files_containing_tper_data[file_to_download]["download_link"]
+        file_name = files_containing_tper_data[file_to_download]["file_name"]
+        file_extension = files_containing_tper_data[file_to_download]["file_extension"]
+        response = requests.get(f"https://solweb.tper.it/web/tools/open-data/{url_end}")
+        with open(os.path.join(original_data, file_name + file_extension), "wb") as file:
             file.write(response.content)
-    """
-    for filename, url in urls.items():
-        response = requests.get(url)
-        with open(os.path.join(original_data, filename), "wb") as file:
-            file.write(response.content)
-    """
+        list_of_original_data_path.append(os.path.join(original_data, file_name + file_extension))
 
     # Let's create the processed_data folder
     processed_data = os.path.join(dataset_path, "processed_data")
     if not os.path.exists(processed_data):
         os.mkdir(processed_data)
 
-    # Let's Process bus_stops
-    with open(os.path.join(original_data, "bus_stops.csv"), mode='r') as infile:
-        csvFile = csv.reader(infile, delimiter=';')
-        csvFile.__next__()
-        bus_stops = [{"name": bus_stop[1], "verbal_location": bus_stop[2],
-                      "x": int(bus_stop[4]), "y": int(bus_stop[5]), "zone_code": bus_stop[8]}
-                     for bus_stop in csvFile]
-
-        x_tot = 0
-        y_tot = 0
-        for el in bus_stops:
-            x_tot += el["x"]
-            y_tot += el["y"]
-        x_mean = x_tot / len(bus_stops)
-        y_mean = y_tot / len(bus_stops)
-        for el in bus_stops:
-            el["x"] -= x_mean
-            el["y"] -= y_mean
-
-        # Writing to sample.json
-        with open(os.path.join(processed_data, "bus_stops.json"), "w") as outfile:
-            json.dump(bus_stops, outfile)
+    # Let's Process data
+    preferred_file_name = {
+        "fermate": "bus_stops",
+        "gommagtfsbo": "busses_bologna",
+        "gommagtfsfe": "busses_ferrara",
+    }
+    process_functions = {
+        "bus_stops" : process_bus_stops,
+    }
+    for original_data_path in list_of_original_data_path:
+        file_name = original_data_path[:-4].split("/")[-1]
+        extension = original_data_path[-4:]
+        # Let's check if we have a preferred name for it
+        if file_name in preferred_file_name.keys():
+            file_name = preferred_file_name[file_name]
+        # If it's a zip file let's extract it
+        if extension == ".zip":
+            extracted_folder_path = os.path.join(dataset_path, "processed_data", file_name)
+            with zipfile.ZipFile(original_data_path, 'r') as zip_ref:
+                zip_ref.extractall(extracted_folder_path)
+        # If it's a csv let's translate into a json
+        elif extension == ".csv":
+            if file_name in process_functions.keys():
+                json_path = os.path.join(dataset_path, "processed_data", file_name + ".json")
+                process_functions[file_name](original_data_path, json_path)
+        else:
+            raise Exception(f"Unsupported file extension! It must be in [\".csv\", \".zip\"] but it's: {extension}")
+    exit()
