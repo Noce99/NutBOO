@@ -9,9 +9,13 @@ def process_bus_stops(csv_input_path, json_output_path):
     with open(csv_input_path, mode='r') as infile:
         csvFile = csv.reader(infile, delimiter=';')
         csvFile.__next__()
+        accepted_locations = ["BOLOGNA", "CASALECCHIO DI RENO"]
         bus_stops = [{"name": bus_stop[1], "verbal_location": bus_stop[2],
-                      "x": int(bus_stop[4]), "y": int(bus_stop[5]), "zone_code": bus_stop[8]}
-                     for bus_stop in csvFile]
+                      "x": int(bus_stop[4]), "y": int(bus_stop[5]),
+                      "lat": float(bus_stop[6].replace(",", ".")),
+                      "lon": float(bus_stop[7].replace(",", ".")),
+                      "zone_code": bus_stop[8]}
+                     for bus_stop in csvFile if bus_stop[3] in accepted_locations]
 
         x_tot = 0
         y_tot = 0
