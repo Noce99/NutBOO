@@ -114,13 +114,27 @@ canvas {
 }
 
 .bottom_right_stop_name_display {
-    position: fixed;
+  position: fixed;
   bottom: 0;
   right: 0;
   width: 10%;
   height: 10%;
   background-color: rgba(0, 0, 0, 1);
   color: #e8c142; /* text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.bottom_left_click_coordinate_display {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 10%;
+  height: 10%;
+  background-color: rgba(0, 0, 0, 1);
+  color: #42e869; /* text color */
   display: flex;
   justify-content: center;
   align-items: center;

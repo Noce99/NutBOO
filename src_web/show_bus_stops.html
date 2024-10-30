@@ -21,6 +21,7 @@
         <div id="top_right_coordinate_display" class="top_right_coordinate_display"></div>
         <div id="top_left_scale_display" class="top_left_scale_display"></div>
         <div id="bottom_right_stop_name_display" class="bottom_right_stop_name_display"></div>
+        <div id="bottom_left_click_coordinate_display" class="bottom_left_click_coordinate_display"></div>
         <script>
             function getDisplayRatio() {
                 const width = window.innerWidth;
@@ -28,7 +29,8 @@
                 const ratio = (width / height).toFixed(2); // Mantiene 2 cifre decimali
                 console.log(ratio)
                 const inputBox = document.getElementById("myCanvas");
-                inputBox.setAttribute("width", String(500*ratio));
+                inputBox.setAttribute("width", String(window.innerWidth * 0.8));
+                inputBox.setAttribute("height", String(window.innerHeight * 0.7));
             }
             getDisplayRatio();
             window.addEventListener('resize', getDisplayRatio);

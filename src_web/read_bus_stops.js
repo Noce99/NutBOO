@@ -9,6 +9,7 @@ let width_in_km;
 let top_right_coordinate_display;
 let top_left_scale_display;
 let bottom_right_stop_name_display;
+let bottom_left_click_coordinate_display;
 let selected_bus_stop_i = -1;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -17,16 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
     top_right_coordinate_display = document.getElementById("top_right_coordinate_display");
     top_left_scale_display = document.getElementById("top_left_scale_display");
     bottom_right_stop_name_display = document.getElementById("bottom_right_stop_name_display");
+    bottom_left_click_coordinate_display = document.getElementById("bottom_left_click_coordinate_display");
     canvas.addEventListener("click", function(event) {
-        // Ottieni le coordinate del clic all'interno del canvas
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
+
         const lat = y_to_lat(y);
         const lon = x_to_lon(x);
 
-        console.log(x + " " + y)
-        console.log(lat.toFixed(4) + " N " + lon.toFixed(4) + " E")
         let min = 0;
         let min_i = -1;
         for (let i=0; i < data.length; i++) {
@@ -36,10 +36,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 min = distance;
             }
         }
-        console.log("Closer stop: " + data[min_i].name)
         bottom_right_stop_name_display.innerHTML = data[min_i].name;
+        bottom_left_click_coordinate_display.innerHTML = lat.toFixed(4) + " N " +
+            lon.toFixed(4) + " E";
         selected_bus_stop_i = min_i;
         draw_data();
+
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgb(241,229,162)';
+        ctx.strokeStyle = 'rgb(241,229,162)';
+        ctx.fill();
+        ctx.stroke();
     });
 });
 
