@@ -55,12 +55,23 @@ document.addEventListener('DOMContentLoaded', function() {
     let pointer_down_pointing_lon;
     let pointer_down_pointing_lat;
     let mouse_is_pressed;
+
+    let pointers = [];
+    let initialDistance = 0;
+
     canvas.addEventListener("pointerdown", function(event) {
         pointer_down_start_x = event.clientX;
         pointer_down_start_y = event.clientY;
         mouse_is_pressed = true;
         pointer_down_pointing_lon = pointing_lon;
         pointer_down_pointing_lat = pointing_lat;
+
+        // pinch-to-zoom
+        pointers.push(event);
+
+        if (pointers.length === 2) {
+            initialDistance = getDistance(pointers[0], pointers[1]);
+        }
     });
 
     canvas.addEventListener("pointermove", function(event) {
@@ -70,15 +81,45 @@ document.addEventListener('DOMContentLoaded', function() {
         let end_y = event.clientY;
         pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x)*zoom_value;
         pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y)*zoom_value;
+
+        // pinch-to-zoom
+        for (let i = 0; i < pointers.length; i++) {
+            if (pointers[i].pointerId === event.pointerId) {
+                pointers[i] = event;
+                break;
+            }
+        }
+
+        if (pointers.length === 2) {
+            // Calcola la distanza attuale e confrontala con quella iniziale
+            const currentDistance = getDistance(pointers[0], pointers[1]);
+            const scaleChange = currentDistance / initialDistance;
+            zoom_value *= scaleChange;
+            initialDistance = currentDistance;
+        }
         draw_data();
     });
 
     canvas.addEventListener("pointerup", function(event) {
         mouse_is_pressed = false;
+
+        // pinch-to-zoom
+        pointers = pointers.filter(p => p.pointerId !== event.pointerId);
+
+        if (pointers.length < 2) {
+            initialDistance = 0;
+        }
     });
 
     canvas.addEventListener("pointercancel", function(event) {
         mouse_is_pressed = false;
+
+        // pinch-to-zoom
+        pointers = pointers.filter(p => p.pointerId !== event.pointerId);
+
+        if (pointers.length < 2) {
+            initialDistance = 0;
+        }
     });
 
     canvas.addEventListener("wheel", function(event) {
@@ -189,3 +230,8 @@ function down(){
     draw_data();
 }
 
+function getDistance(p1, p2) {
+    const dx = p2.clientX - p1.clientX;
+    const dy = p2.clientY - p1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
