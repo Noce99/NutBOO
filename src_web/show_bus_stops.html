@@ -31,7 +31,9 @@
                 const inputBox = document.getElementById("myCanvas");
                 inputBox.setAttribute("width", String(window.innerWidth * 0.8));
                 inputBox.setAttribute("height", String(window.innerHeight * 0.7));
-                draw_data()
+                if (typeof canvas !== 'undefined') {
+                    draw_data()
+                }
             }
             getDisplayRatio();
             window.addEventListener('resize', getDisplayRatio);

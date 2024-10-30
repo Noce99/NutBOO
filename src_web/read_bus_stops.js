@@ -52,16 +52,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     let pointer_down_start_x;
     let pointer_down_start_y;
+    let pointer_down_pointing_lon;
+    let pointer_down_pointing_lat;
+    let mouse_is_pressed;
     canvas.addEventListener("pointerdown", function(event) {
         pointer_down_start_x = event.clientX;
         pointer_down_start_y = event.clientY;
+        mouse_is_pressed = true;
+        pointer_down_pointing_lon = pointing_lon;
+        pointer_down_pointing_lat = pointing_lat;
+    });
+
+    canvas.addEventListener("pointermove", function(event) {
+        if (!mouse_is_pressed) return;
+
+        let end_x = event.clientX;
+        let end_y = event.clientY;
+        pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x)*zoom_value;
+        pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y)*zoom_value;
+        draw_data();
     });
 
     canvas.addEventListener("pointerup", function(event) {
-        let end_x = event.clientX;
-        let end_y = event.clientY;
-        pointing_lon += (pointer_down_start_x - end_x)*zoom_value;
-        pointing_lat -= (pointer_down_start_y - end_y)*zoom_value;
+        mouse_is_pressed = false;
+    });
+
+    canvas.addEventListener("pointercancel", function(event) {
+        mouse_is_pressed = false;
+    });
+
+    canvas.addEventListener("wheel", function(event) {
+        if (event.deltaY < 0) {
+            zoom_value /= 2;
+        } else {
+            zoom_value *= 2;
+        }
+        draw_data();
     });
 });
 
