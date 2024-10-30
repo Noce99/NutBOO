@@ -75,12 +75,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     canvas.addEventListener("pointermove", function(event) {
-        if (!mouse_is_pressed) return;
+        if (pointers.length === 1) {
+            if (!mouse_is_pressed) return;
 
-        let end_x = event.clientX;
-        let end_y = event.clientY;
-        pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x)*zoom_value;
-        pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y)*zoom_value;
+            let end_x = event.clientX;
+            let end_y = event.clientY;
+            pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x) * zoom_value;
+            pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y) * zoom_value;
+        }
 
         // pinch-to-zoom
         for (let i = 0; i < pointers.length; i++) {
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calcola la distanza attuale e confrontala con quella iniziale
             const currentDistance = getDistance(pointers[0], pointers[1]);
             const scaleChange = currentDistance / initialDistance;
-            zoom_value *= scaleChange;
+            zoom_value /= scaleChange;
             initialDistance = currentDistance;
         }
         draw_data();
