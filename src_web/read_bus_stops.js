@@ -50,6 +50,19 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fill();
         ctx.stroke();
     });
+    let pointer_down_start_x;
+    let pointer_down_start_y;
+    canvas.addEventListener("pointerdown", function(event) {
+        pointer_down_start_x = event.clientX;
+        pointer_down_start_y = event.clientY;
+    });
+
+    canvas.addEventListener("pointerup", function(event) {
+        let end_x = event.clientX;
+        let end_y = event.clientY;
+        pointing_lon += (pointer_down_start_x - end_x)*zoom_value;
+        pointing_lat -= (pointer_down_start_y - end_y)*zoom_value;
+    });
 });
 
 function fetchJSONData() {

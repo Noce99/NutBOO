@@ -45,8 +45,6 @@ if __name__ == "__main__":
                     files_containing_tper_data[element]["file_extension"] = ".zip"
         if "download_link" not in files_containing_tper_data[element].keys():
             print(f"Not able to find! {files_containing_tper_data[element]['file_name']}")
-        
-    print(files_containing_tper_data)
 
     # Let's create the dataset folder
     current_path = pathlib.Path(__file__).parent.resolve()
