@@ -11,17 +11,50 @@
 
 <body>
     <div class="container">
-        <button type="button" class="btn2 second_raw_left" onclick="unzoom()">-</button>
-        <button type="button" class="btn2 second_raw_right" onclick="zoom()">+</button>
-        <button type="button" class="btn right-btn" onclick="right()">-></button>
-        <button type="button" class="btn left-btn" onclick="left()"><-</button>
-        <button type="button" class="btn top-btn" onclick="up()">^</button>
-        <button type="button" class="btn bottom-btn" onclick="down()">v</button>
+        <button id="question_map" type="button" class="btn top-btn" onclick="map_questions_switch()">Domande</button>
         <canvas id="myCanvas" class="canvas" height="500" width="500"></canvas>
         <div id="top_right_coordinate_display" class="top_right_coordinate_display"></div>
         <div id="top_left_scale_display" class="top_left_scale_display"></div>
         <div id="bottom_right_stop_name_display" class="bottom_right_stop_name_display"></div>
         <div id="bottom_left_click_coordinate_display" class="bottom_left_click_coordinate_display"></div>
+        <div id="questions_panel" class="questions_panel">
+            <h1>Domanda 1</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_1" class="answer" type="text">
+            <h1>Domanda 2</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_2" class="answer" type="text">
+            <h1>Domanda 3</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_3" class="answer" type="text">
+            <h1>Domanda 4</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_4" class="answer" type="text">
+            <h1>Domanda 5</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_5" class="answer" type="text">
+            <h1>Domanda 6</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_6" class="answer" type="text">
+            <h1>Domanda 7</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_7" class="answer" type="text">
+            <h1>Domanda 8</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_8" class="answer" type="text">
+            <h1>Domanda 9</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_9" class="answer" type="text">
+            <h1>Domanda 10</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_10" class="answer" type="text">
+            <h1>Domanda 11</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_11" class="answer" type="text">
+            <h1>Domanda 12</h1>
+            <p>Quante zampe hanno i cavalli?</p>
+            <input id="answer_12" class="answer" type="text">
+        </div>
         <script>
             function getDisplayRatio() {
                 const width = window.innerWidth;
@@ -30,7 +63,7 @@
                 console.log(ratio)
                 const inputBox = document.getElementById("myCanvas");
                 inputBox.setAttribute("width", String(window.innerWidth * 0.8));
-                inputBox.setAttribute("height", String(window.innerHeight * 0.7));
+                inputBox.setAttribute("height", String(window.innerHeight * 0.8));
                 if (typeof canvas !== 'undefined') {
                     draw_data()
                 }
