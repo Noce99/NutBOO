@@ -186,10 +186,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let end_y = event.clientY;
 
         questions_panel.scrollTo({
-          top: starting_scroll+(-end_y+start_y)*10,
+          top: starting_scroll+(-end_y+start_y)*7,
           behavior: "smooth"
         });
-        console.log(starting_scroll+(-end_y+start_y));
     });
 
     questions_panel.addEventListener("pointerup", function(event) {
