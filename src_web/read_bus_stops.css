@@ -127,3 +127,24 @@ canvas {
   align-items: center;
   text-align: center;
 }
+
+::-webkit-scrollbar {
+    width: 16px; /* Imposta la larghezza della scrollbar */
+}
+
+/* Sfondo della barra di scorrimento */
+::-webkit-scrollbar-track {
+    background: #988ca5;
+}
+
+/* Colore della maniglia di scorrimento */
+::-webkit-scrollbar-thumb {
+    background-color: #50e81d;
+    border-radius: 8px;
+    border: 3px solid #223dae; /* Aggiunge un bordo per fare sembrare la maniglia più sottile */
+}
+
+/* Maniglia al passaggio del mouse */
+::-webkit-scrollbar-thumb:hover {
+    background: #dc0606;
+}
