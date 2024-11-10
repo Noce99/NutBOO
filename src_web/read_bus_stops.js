@@ -1,6 +1,7 @@
 let maps_is_visible = true;
 
 let canvas;
+let questions_panel;
 let ctx;
 let zoom_value = 0.001; // deg / px
 let data;
@@ -22,43 +23,42 @@ const MAX_LAT = 44.57;
 
 document.addEventListener('DOMContentLoaded', function() {
     canvas = document.getElementById("myCanvas");
+    questions_panel = document.getElementById("questions_panel");
     fetchJSONData();
     top_right_coordinate_display = document.getElementById("top_right_coordinate_display");
     top_left_scale_display = document.getElementById("top_left_scale_display");
     bottom_right_stop_name_display = document.getElementById("bottom_right_stop_name_display");
     bottom_left_click_coordinate_display = document.getElementById("bottom_left_click_coordinate_display");
     canvas.addEventListener("click", function(event) {
-        if (maps_is_visible) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-            const lat = y_to_lat(y);
-            const lon = x_to_lon(x);
+        const lat = y_to_lat(y);
+        const lon = x_to_lon(x);
 
-            let min = 0;
-            let min_i = -1;
-            for (let i = 0; i < data.length; i++) {
-                let distance = Math.abs(lat - parseFloat(data[i].lat)) + Math.abs(lon - parseFloat(data[i].lon));
-                if (min_i === -1 || distance < min) {
-                    min_i = i;
-                    min = distance;
-                }
+        let min = 0;
+        let min_i = -1;
+        for (let i = 0; i < data.length; i++) {
+            let distance = Math.abs(lat - parseFloat(data[i].lat)) + Math.abs(lon - parseFloat(data[i].lon));
+            if (min_i === -1 || distance < min) {
+                min_i = i;
+                min = distance;
             }
-            bottom_right_stop_name_display.innerHTML = data[min_i].name;
-            bottom_left_click_coordinate_display.innerHTML = lat.toFixed(4) + " N " +
-                lon.toFixed(4) + " E";
-            selected_bus_stop_i = min_i;
-            draw_data();
-
-            ctx.beginPath();
-            ctx.arc(x, y, 2, 0, 2 * Math.PI);
-            ctx.closePath();
-            ctx.fillStyle = 'rgb(241,229,162)';
-            ctx.strokeStyle = 'rgb(241,229,162)';
-            ctx.fill();
-            ctx.stroke();
         }
+        bottom_right_stop_name_display.innerHTML = data[min_i].name;
+        bottom_left_click_coordinate_display.innerHTML = lat.toFixed(4) + " N " +
+            lon.toFixed(4) + " E";
+        selected_bus_stop_i = min_i;
+        draw_data();
+
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgb(241,229,162)';
+        ctx.strokeStyle = 'rgb(241,229,162)';
+        ctx.fill();
+        ctx.stroke();
     });
     let pointer_down_start_x;
     let pointer_down_start_y;
@@ -68,110 +68,132 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pointers = [];
     let initialDistance = 0;
+    let starting_scroll;
+    let start_y;
 
     canvas.addEventListener("pointerdown", function(event) {
-        if (maps_is_visible) {
-            pointer_down_start_x = event.clientX;
-            pointer_down_start_y = event.clientY;
-            mouse_is_pressed = true;
-            pointer_down_pointing_lon = pointing_lon;
-            pointer_down_pointing_lat = pointing_lat;
+        pointer_down_start_x = event.clientX;
+        pointer_down_start_y = event.clientY;
+        mouse_is_pressed = true;
+        pointer_down_pointing_lon = pointing_lon;
+        pointer_down_pointing_lat = pointing_lat;
 
-            // pinch-to-zoom
-            pointers.push(event);
+        // pinch-to-zoom
+        pointers.push(event);
 
-            if (pointers.length === 2) {
-                initialDistance = getDistance(pointers[0], pointers[1]);
-            }
+        if (pointers.length === 2) {
+            initialDistance = getDistance(pointers[0], pointers[1]);
         }
     });
 
     canvas.addEventListener("pointermove", function(event) {
-        if (maps_is_visible) {
-            if (pointers.length === 1) {
-                if (!mouse_is_pressed) return;
+        if (pointers.length === 1) {
+            if (!mouse_is_pressed) return;
 
-                let end_x = event.clientX;
-                let end_y = event.clientY;
-                pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x) * zoom_value;
-                pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y) * zoom_value;
-                if (pointing_lon < MIN_LON) {
-                    pointing_lon = MIN_LON;
-                } else if (pointing_lon > MAX_LON) {
-                    pointing_lon = MAX_LON;
-                }
-                if (pointing_lat < MIN_LAT) {
-                    pointing_lat = MIN_LAT;
-                } else if (pointing_lat > MAX_LAT) {
-                    pointing_lat = MAX_LAT;
-                }
+            let end_x = event.clientX;
+            let end_y = event.clientY;
+            pointing_lon = pointer_down_pointing_lon + (pointer_down_start_x - end_x) * zoom_value;
+            pointing_lat = pointer_down_pointing_lat - (pointer_down_start_y - end_y) * zoom_value;
+            if (pointing_lon < MIN_LON) {
+                pointing_lon = MIN_LON;
+            } else if (pointing_lon > MAX_LON) {
+                pointing_lon = MAX_LON;
             }
-
-            // pinch-to-zoom
-            for (let i = 0; i < pointers.length; i++) {
-                if (pointers[i].pointerId === event.pointerId) {
-                    pointers[i] = event;
-                    break;
-                }
+            if (pointing_lat < MIN_LAT) {
+                pointing_lat = MIN_LAT;
+            } else if (pointing_lat > MAX_LAT) {
+                pointing_lat = MAX_LAT;
             }
-
-            if (pointers.length === 2) {
-                // Calcola la distanza attuale e confrontala con quella iniziale
-                const currentDistance = getDistance(pointers[0], pointers[1]);
-                const scaleChange = currentDistance / initialDistance;
-                zoom_value /= scaleChange;
-                if (zoom_value < MIN_ZOOM) {
-                    zoom_value = MIN_ZOOM;
-                } else if (zoom_value > MAX_ZOOM) {
-                    zoom_value = MAX_ZOOM;
-                }
-                initialDistance = currentDistance;
-            }
-            draw_data();
         }
+
+        // pinch-to-zoom
+        for (let i = 0; i < pointers.length; i++) {
+            if (pointers[i].pointerId === event.pointerId) {
+                pointers[i] = event;
+                break;
+            }
+        }
+
+        if (pointers.length === 2) {
+            // Calcola la distanza attuale e confrontala con quella iniziale
+            const currentDistance = getDistance(pointers[0], pointers[1]);
+            const scaleChange = currentDistance / initialDistance;
+            zoom_value /= scaleChange;
+            if (zoom_value < MIN_ZOOM) {
+                zoom_value = MIN_ZOOM;
+            } else if (zoom_value > MAX_ZOOM) {
+                zoom_value = MAX_ZOOM;
+            }
+            initialDistance = currentDistance;
+        }
+        draw_data();
     });
 
     canvas.addEventListener("pointerup", function(event) {
-        if (maps_is_visible) {
-            mouse_is_pressed = false;
+        mouse_is_pressed = false;
 
-            // pinch-to-zoom
-            pointers = pointers.filter(p => p.pointerId !== event.pointerId);
+        // pinch-to-zoom
+        pointers = pointers.filter(p => p.pointerId !== event.pointerId);
 
-            if (pointers.length < 2) {
-                initialDistance = 0;
-            }
+        if (pointers.length < 2) {
+            initialDistance = 0;
         }
     });
 
     canvas.addEventListener("pointercancel", function(event) {
-        if (maps_is_visible) {
-            mouse_is_pressed = false;
+        mouse_is_pressed = false;
 
-            // pinch-to-zoom
-            pointers = pointers.filter(p => p.pointerId !== event.pointerId);
+        // pinch-to-zoom
+        pointers = pointers.filter(p => p.pointerId !== event.pointerId);
 
-            if (pointers.length < 2) {
-                initialDistance = 0;
-            }
+        if (pointers.length < 2) {
+            initialDistance = 0;
         }
     });
 
     canvas.addEventListener("wheel", function(event) {
-        if (maps_is_visible) {
-            if (event.deltaY < 0) {
-                zoom_value /= 2;
-                if (zoom_value < MIN_ZOOM) {
-                    zoom_value = MIN_ZOOM;
-                }
-            } else {
-                zoom_value *= 2;
-                if (zoom_value > MAX_ZOOM) {
-                    zoom_value = MAX_ZOOM;
-                }
+        if (event.deltaY < 0) {
+            zoom_value /= 2;
+            if (zoom_value < MIN_ZOOM) {
+                zoom_value = MIN_ZOOM;
             }
-            draw_data();
+        } else {
+            zoom_value *= 2;
+            if (zoom_value > MAX_ZOOM) {
+                zoom_value = MAX_ZOOM;
+            }
         }
+        draw_data();
+    });
+
+    questions_panel.addEventListener("click", function(event){
+        console.log("Suca");
+        // questions_panel.scrollTo({
+        //  top: 100,
+        //  behavior: "smooth"
+        //});
+    });
+
+    questions_panel.addEventListener("pointerdown", function(event) {
+        start_y = event.clientY;
+        mouse_is_pressed = true;
+        starting_scroll = questions_panel.scrollTop;
+    });
+
+    questions_panel.addEventListener("pointermove", function(event) {
+        if (!mouse_is_pressed) return;
+
+        let end_y = event.clientY;
+
+        questions_panel.scrollTo({
+          top: starting_scroll+(-end_y+start_y),
+          behavior: "smooth"
+        });
+        console.log(starting_scroll+(-end_y+start_y));
+    });
+
+    questions_panel.addEventListener("pointerup", function(event) {
+        mouse_is_pressed = false;
     });
 });
 
@@ -257,14 +279,12 @@ function map_questions_switch(){
         canvas.style.visibility = "hidden";
         let question_map = document.getElementById("question_map");
         question_map.innerHTML = "Mappa"
-        let questions_panel = document.getElementById("questions_panel");
         questions_panel.style.visibility = "visible"
     }else{
         maps_is_visible = true;
         canvas.style.visibility = "visible";
         let question_map = document.getElementById("question_map");
         question_map.innerHTML = "Domande"
-        let questions_panel = document.getElementById("questions_panel");
         questions_panel.style.visibility = "hidden"
     }
 }
