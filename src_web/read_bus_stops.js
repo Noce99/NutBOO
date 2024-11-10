@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let end_y = event.clientY;
 
         questions_panel.scrollTo({
-          top: starting_scroll+(-end_y+start_y)*4,
+          top: starting_scroll+(-end_y+start_y)*10,
           behavior: "smooth"
         });
         console.log(starting_scroll+(-end_y+start_y));
