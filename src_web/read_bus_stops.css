@@ -131,9 +131,11 @@ canvas {
 @media (max-width: 768px) {
   h1 {
       font-size: 10vw;
+      color: red;
   }
   p {
     font-size: 6vw;
+    color: red;
   }
   input {
     font-size: 6vw;
