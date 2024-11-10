@@ -128,8 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 initialDistance = currentDistance;
             }
             draw_data();
-        }else{
-            console.log("Moving")
         }
     });
 

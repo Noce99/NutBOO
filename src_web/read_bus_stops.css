@@ -117,6 +117,7 @@ canvas {
   padding: 1%;
   visibility: hidden;
   background-color: #edb321;
+  -webkit-overflow-scrolling: touch;
 }
 
 .answer{
