@@ -21,6 +21,9 @@ const MAX_LON = 11.45;
 const MIN_LAT = 44.4;
 const MAX_LAT = 44.57;
 
+const bologna_satellite = new Image;
+let bologna_satellite_loaded = false;
+
 document.addEventListener('DOMContentLoaded', function() {
     canvas = document.getElementById("myCanvas");
     questions_panel = document.getElementById("questions_panel");
@@ -29,6 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
     top_left_scale_display = document.getElementById("top_left_scale_display");
     bottom_right_stop_name_display = document.getElementById("bottom_right_stop_name_display");
     bottom_left_click_coordinate_display = document.getElementById("bottom_left_click_coordinate_display");
+
+    bologna_satellite.src = "./Bologna.jpg";
+    bologna_satellite.onload = function() {
+        bologna_satellite_loaded = true;
+        console.log("Loaded Bologna.jpg!")
+    }
+
+
     canvas.addEventListener("click", function(event) {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
@@ -231,6 +242,10 @@ function y_to_lat(y) {
 function draw_data(){
     if (maps_is_visible) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (bologna_satellite_loaded){
+            console.log("Printing!");
+            print_bologna_in_correct_position(ctx, canvas.width, canvas.height);
+        }
         for (let i = 0; i < data.length; i++) {
             let radius, color;
             if (i === selected_bus_stop_i) {
@@ -286,4 +301,86 @@ function map_questions_switch(){
         question_map.innerHTML = "Domande"
         questions_panel.style.visibility = "hidden"
     }
+}
+
+// 4028, 1009 --> 11.342787 44.494055
+// 3000, 514 --> 11.320800 44.501614
+const m_lat_to_y = (1009 - 514) / (44.494055 - 44.501614);
+const q_lat_to_y = (44.494055*514 - 44.501614*1009) / (44.494055  - 44.501614);
+const m_lon_to_x = (4028 - 3000) / (11.342787 - 11.320800);
+const q_lon_to_x = (11.342787 *3000 - 11.320800*4028) / (11.342787 - 11.320800);
+
+function lat_to_y_image(lat){
+    return lat*m_lat_to_y  + q_lat_to_y;
+}
+
+function lon_to_x_image(lon){
+    return lon*m_lon_to_x  + q_lon_to_x;
+}
+
+function y_image_to_lat(y){
+    return (y-q_lat_to_y)/m_lat_to_y;
+}
+
+function x_image_to_lon(x){
+    return (x-q_lon_to_x)/m_lon_to_x;
+}
+
+
+function print_bologna_in_correct_position(ctx, width, height){
+    let lon_top_left_canvas = x_to_lon(0);
+    let lat_top_left_canvas = y_to_lat(0);
+    let lon_top_left_image = x_image_to_lon(0);
+    let lat_top_left_image = y_image_to_lat(0);
+
+    let lon_bottom_right_canvas = x_to_lon(canvas.width);
+    let lat_bottom_right_canvas = y_to_lat(canvas.height);
+    let lon_bottom_right_image = x_image_to_lon(bologna_satellite.width);
+    let lat_bottom_right_image = y_image_to_lat(bologna_satellite.height);
+
+    let sx;
+    let sy;
+    let sWidth;
+    let sHeight;
+    let dx;
+    let dy;
+    let dWidth;
+    let dHeight;
+
+
+    if (lon_top_left_canvas < lon_top_left_image){
+        sx = 0;
+        dx = lon_to_x(lon_top_left_image);
+
+    }else{
+        sx = lon_to_x_image(lon_top_left_canvas);
+        dx = 0;
+    }
+
+    if (lat_top_left_canvas > lat_top_left_image){
+        sy = 0;
+        dy = lat_to_y(lat_top_left_image);
+
+    }else{
+        sy = lat_to_y_image(lat_top_left_canvas);
+        dy = 0;
+    }
+
+    if (lon_bottom_right_canvas > lon_bottom_right_image){
+        sWidth = bologna_satellite.width - sx;
+        dWidth = lon_to_x(lon_bottom_right_image) - dx;
+    }else{
+        sWidth = lon_to_x_image(lon_bottom_right_canvas) - sx;
+        dWidth = canvas.width - dx;
+    }
+
+    if (lat_bottom_right_canvas < lat_bottom_right_image){
+        sHeight = bologna_satellite.height - sy;
+        dHeight = lat_to_y(lat_bottom_right_image) - dy;
+    }else{
+        sHeight = lat_to_y_image(lat_bottom_right_canvas) - sy;
+        dHeight = canvas.height - dy;
+    }
+    console.log("sx = " +sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight)
+    ctx.drawImage(bologna_satellite, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 }
