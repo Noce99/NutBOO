@@ -204,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         last_y = start_y;
         mouse_is_pressed = true;
         starting_scroll = questions_panel.scrollTop;
+        kinetic_scrolling_speed  = 0;
     });
 
     questions_panel.addEventListener("pointermove", function(event) {
@@ -217,15 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         last_y = this_y;
         last_t = this_t;
-        console.log("Instant Speed = " + kinetic_scrolling_speed);
     });
 
     questions_panel.addEventListener("pointerup", function(event) {
         mouse_is_pressed = false;
-        // let end_y = event.clientY;
-        // kinetic_scrolling_speed = (end_y - start_y) / (Date.now() / 1000 - start_t);
-        console.log("Starting!")
-        console.log(kinetic_scrolling_speed)
         scroll_kinetic()
     });
 });
