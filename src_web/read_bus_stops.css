@@ -113,3 +113,22 @@ input {
   text-align: center;
   font-size: 2vh;
 }
+
+.answer_file{
+  display: none;
+}
+
+.answer-button{
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 4vh;
+}
