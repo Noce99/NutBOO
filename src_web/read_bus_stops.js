@@ -3,10 +3,8 @@ let maps_is_visible = true;
 let canvas;
 let questions_panel;
 let ctx;
-let zoom_value = 0.001; // deg / px
+
 let data;
-let pointing_lon = 11.34310;
-let pointing_lat = 44.49375;
 let height_in_km;
 let width_in_km;
 let top_right_coordinate_display;
@@ -15,14 +13,19 @@ let bottom_right_stop_name_display;
 let bottom_left_click_coordinate_display;
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM = 0.005;
-const MIN_LON = 11.21;
-const MAX_LON = 11.45;
-const MIN_LAT = 44.4;
-const MAX_LAT = 44.57;
+const MAX_ZOOM = 0.00008;
+let zoom_value = MAX_ZOOM; // deg / px
+const MIN_LON = 11.256635603112843;
+const MAX_LON = 11.365479808365757;
+const MIN_LAT = 44.47267601010103;
+const MAX_LAT = 44.50946314343433;
+let pointing_lon = 11.34310;
+let pointing_lat = 44.49375;
 
 const bologna_satellite = new Image;
 let bologna_satellite_loaded = false;
+
+let bus_stop_radius = 2;
 
 document.addEventListener('DOMContentLoaded', function() {
     canvas = document.getElementById("myCanvas");
@@ -37,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bologna_satellite.onload = function() {
         bologna_satellite_loaded = true;
         console.log("Loaded Bologna.jpg!")
+        draw_data();
     }
 
 
@@ -115,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (pointing_lat > MAX_LAT) {
                 pointing_lat = MAX_LAT;
             }
+            draw_data();
         }
 
         // pinch-to-zoom
@@ -136,8 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 zoom_value = MAX_ZOOM;
             }
             initialDistance = currentDistance;
+            draw_data();
         }
-        draw_data();
     });
 
     canvas.addEventListener("pointerup", function(event) {
@@ -197,8 +202,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let end_y = event.clientY;
 
         questions_panel.scrollTo({
-          top: starting_scroll+(-end_y+start_y)*7,
-          behavior: "smooth"
+          top: starting_scroll+(-end_y+start_y),
+          behavior: "instant"
         });
     });
 
@@ -243,8 +248,8 @@ function draw_data(){
     if (maps_is_visible) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (bologna_satellite_loaded){
-            console.log("Printing!");
             print_bologna_in_correct_position(ctx, canvas.width, canvas.height);
+            console.log(zoom_value)
         }
         for (let i = 0; i < data.length; i++) {
             let radius, color;
@@ -381,6 +386,5 @@ function print_bologna_in_correct_position(ctx, width, height){
         sHeight = lat_to_y_image(lat_bottom_right_canvas) - sy;
         dHeight = canvas.height - dy;
     }
-    console.log("sx = " +sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight)
     ctx.drawImage(bologna_satellite, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 }
