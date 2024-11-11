@@ -6,6 +6,10 @@ let ctx;
 
 let data;
 let loaded_data = false;
+
+let qa; // questions and answers
+let loaded_qa = false;
+
 let height_in_km;
 let width_in_km;
 
@@ -40,6 +44,7 @@ let map_left, map_top, map_right, map_bottom;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
+    fetchJSONQA();
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
     draw_data();
@@ -61,8 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
     map_top = map_rect.top;
     map_right = map_rect.right;
     map_bottom = map_rect.bottom;
-    console.log("("+map_left+"; "+map_top+") ("+map_right+"; "+map_bottom+")");
-
 
     canvas.addEventListener("click", function(event) {
         const rect = canvas.getBoundingClientRect();
@@ -260,6 +263,52 @@ function fetchJSONData() {
     }).then((d) => {
         data=d;
         loaded_data = true;
+    }).catch((error) =>
+        console.error("Unable to fetch data:", error)
+    );
+}
+
+function fetchJSONQA() {
+    fetch("questions_and_answers.json").then((res) => {
+        if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+    }).then((my_qa) => {
+        qa=my_qa;
+        loaded_qa = true;
+        let divElement = document.getElementById("questions_panel");
+        for (let i = 0; i < qa.length; i++) {
+            console.log(qa[i]);
+            const newH1 = document.createElement("h1");
+            newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
+            const newP = document.createElement("p");
+            newP.innerHTML = qa[i]["question"].toString();
+            divElement.appendChild(newH1);
+            divElement.appendChild(newP);
+
+            if (qa[i]["type_of_answer"] === "text"){
+                const newI = document.createElement("input");
+                newI.type = "text";
+                newI.classList.add("answer");
+                newI.id = "answer_"+qa[i]["question_id"].toString();
+                divElement.appendChild(newI);
+            }else{
+                const newI = document.createElement("input");
+                newI.type = "file";
+                newI.classList.add("answer_file");
+                newI.id = "answer_"+qa[i]["question_id"].toString();
+                divElement.appendChild(newI);
+                const newB = document.createElement("button");
+                newB.classList.add("answer-button");
+                newB.onclick = () => {
+                    document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
+                };
+                newB.innerHTML = "Select an Image";
+                divElement.appendChild(newB);
+            }
+
+        }
     }).catch((error) =>
         console.error("Unable to fetch data:", error)
     );
