@@ -26,7 +26,7 @@ const bologna_satellite = new Image;
 let bologna_satellite_loaded = false;
 
 let kinetic_scrolling_speed = 0;
-let kinetic_scrolling_friction = -0.3;
+let kinetic_scrolling_friction = -0.05;
 let kinetic_scrolling_min_speed = 5.0;
 
 let bus_stop_radius = 2;
@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let starting_scroll;
     let start_y;
     let start_t;
+    let last_t;
+    let last_y;
 
     canvas.addEventListener("pointerdown", function(event) {
         pointer_down_start_x = event.clientX;
@@ -198,25 +200,30 @@ document.addEventListener('DOMContentLoaded', function() {
     questions_panel.addEventListener("pointerdown", function(event) {
         start_y = event.clientY;
         start_t = Date.now() / 1000;
+        last_t = start_t;
+        last_y = start_y;
         mouse_is_pressed = true;
         starting_scroll = questions_panel.scrollTop;
     });
 
     questions_panel.addEventListener("pointermove", function(event) {
         if (!mouse_is_pressed) return;
-
-        let end_y = event.clientY;
-
+        let this_y = event.clientY;
+        let this_t = Date.now() / 1000;
+        kinetic_scrolling_speed = (this_y - last_y) / (this_t - start_t);
         questions_panel.scrollTo({
-          top: starting_scroll+(-end_y+start_y),
+          top: starting_scroll+(-this_y+start_y),
           behavior: "instant"
         });
+        last_y = this_y;
+        last_t = this_t;
+        console.log("Instant Speed = " + kinetic_scrolling_speed);
     });
 
     questions_panel.addEventListener("pointerup", function(event) {
         mouse_is_pressed = false;
-        let end_y = event.clientY;
-        kinetic_scrolling_speed = (end_y - start_y) / (Date.now() / 1000 - start_t);
+        // let end_y = event.clientY;
+        // kinetic_scrolling_speed = (end_y - start_y) / (Date.now() / 1000 - start_t);
         console.log("Starting!")
         console.log(kinetic_scrolling_speed)
         scroll_kinetic()
