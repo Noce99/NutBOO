@@ -5,12 +5,13 @@ let questions_panel;
 let ctx;
 
 let data;
+let loaded_data = false;
 let height_in_km;
 let width_in_km;
-let top_right_coordinate_display;
-let top_left_scale_display;
-let bottom_right_stop_name_display;
-let bottom_left_click_coordinate_display;
+
+let selected_bus_stop_name;
+let sizes_of_the_map;
+
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
 const MAX_ZOOM = 0.00008;
@@ -29,16 +30,24 @@ let kinetic_scrolling_speed = 0;
 let kinetic_scrolling_friction = -0.05;
 let kinetic_scrolling_min_speed = 5.0;
 
-let bus_stop_radius = 2;
+let bus_stop_minimum_radius = 2;
+let bus_stop_maximum_radius = 7;
+let bus_stop_radius_m = (bus_stop_minimum_radius - bus_stop_maximum_radius) / (MAX_ZOOM - MIN_ZOOM);
+let bus_stop_radius_q = (MAX_ZOOM*bus_stop_maximum_radius - MIN_ZOOM*bus_stop_minimum_radius) / (MAX_ZOOM - MIN_ZOOM);
+let bus_stop_radius = bus_stop_minimum_radius;
+
+let map_left, map_top, map_right, map_bottom;
 
 document.addEventListener('DOMContentLoaded', function() {
-    canvas = document.getElementById("myCanvas");
-    questions_panel = document.getElementById("questions_panel");
     fetchJSONData();
-    top_right_coordinate_display = document.getElementById("top_right_coordinate_display");
-    top_left_scale_display = document.getElementById("top_left_scale_display");
-    bottom_right_stop_name_display = document.getElementById("bottom_right_stop_name_display");
-    bottom_left_click_coordinate_display = document.getElementById("bottom_left_click_coordinate_display");
+    canvas = document.getElementById("myCanvas");
+    ctx = canvas.getContext("2d");
+    draw_data();
+    questions_panel = document.getElementById("questions_panel");
+
+    selected_bus_stop_name = document.getElementById("selected_bus_stop_name");
+    selected_bus_stop_name.innerHTML = "Select a Bus Stop (Red Dots)!"
+    sizes_of_the_map = document.getElementById("sizes_of_the_map");
 
     bologna_satellite.src = "./Bologna.jpg";
     bologna_satellite.onload = function() {
@@ -46,6 +55,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Loaded Bologna.jpg!")
         draw_data();
     }
+
+    let map_rect = canvas.getBoundingClientRect();
+    map_left = map_rect.left;
+    map_top = map_rect.top;
+    map_right = map_rect.right;
+    map_bottom = map_rect.bottom;
+    console.log("("+map_left+"; "+map_top+") ("+map_right+"; "+map_bottom+")");
 
 
     canvas.addEventListener("click", function(event) {
@@ -65,9 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 min = distance;
             }
         }
-        bottom_right_stop_name_display.innerHTML = data[min_i].name;
-        bottom_left_click_coordinate_display.innerHTML = lat.toFixed(4) + " N " +
-            lon.toFixed(4) + " E";
+        selected_bus_stop_name.innerHTML = data[min_i].name;
+        // console.log(lat.toFixed(4) + " N " + lon.toFixed(4) + " E"); // SELECTED BUS COORDINATE
         selected_bus_stop_i = min_i;
         draw_data();
 
@@ -147,6 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (zoom_value > MAX_ZOOM) {
                 zoom_value = MAX_ZOOM;
             }
+            bus_stop_radius = zoom_value*bus_stop_radius_m + bus_stop_radius_q;
             initialDistance = currentDistance;
             draw_data();
         }
@@ -186,15 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 zoom_value = MAX_ZOOM;
             }
         }
+        bus_stop_radius = zoom_value*bus_stop_radius_m + bus_stop_radius_q;
         draw_data();
     });
 
-    questions_panel.addEventListener("click", function(event){
-        // console.log("Suca");
-        // questions_panel.scrollTo({
-        //  top: 100,
-        //  behavior: "smooth"
-        //});
+    canvas.addEventListener("mouseleave", function(event) {
+        mouse_is_pressed = false;
     });
 
     questions_panel.addEventListener("pointerdown", function(event) {
@@ -208,6 +221,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     questions_panel.addEventListener("pointermove", function(event) {
+        if (event.clientX < map_left || event.clientX > map_right || event.clientY < map_top || event.clientY > map_bottom){
+            console.log("Out!")
+            mouse_is_pressed = false;
+            kinetic_scrolling_speed = 0;
+            return;
+        }
         if (!mouse_is_pressed) return;
         let this_y = event.clientY;
         let this_t = Date.now() / 1000;
@@ -218,17 +237,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         last_y = this_y;
         last_t = this_t;
+        console.log(event.clientX + " " + event.clientY);
     });
 
     questions_panel.addEventListener("pointerup", function(event) {
         mouse_is_pressed = false;
         scroll_kinetic()
     });
+
+    questions_panel.addEventListener("pointercancel", function(event) {
+        mouse_is_pressed = false;
+        kinetic_scrolling_speed = 0;
+    });
 });
 
 function fetchJSONData() {
-    ctx = canvas.getContext("2d");
-    ctx.fillStyle = "red";
     fetch("data/bus_stops.json").then((res) => {
         if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
@@ -236,7 +259,7 @@ function fetchJSONData() {
         return res.json();
     }).then((d) => {
         data=d;
-        draw_data();
+        loaded_data = true;
     }).catch((error) =>
         console.error("Unable to fetch data:", error)
     );
@@ -259,19 +282,18 @@ function y_to_lat(y) {
 }
 
 function draw_data(){
-    if (maps_is_visible) {
+    if (maps_is_visible && loaded_data) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (bologna_satellite_loaded){
             print_bologna_in_correct_position(ctx, canvas.width, canvas.height);
-            console.log(zoom_value)
         }
         for (let i = 0; i < data.length; i++) {
             let radius, color;
             if (i === selected_bus_stop_i) {
-                radius = 5;
+                radius = bus_stop_radius * 2;
                 color = 'rgb(197,19,213)'
             } else {
-                radius = 2;
+                radius = bus_stop_radius;
                 color = 'rgba(255, 0, 0, 1.0)'
             }
             ctx.beginPath();
@@ -291,12 +313,13 @@ function draw_data(){
         ctx.stroke();
 
         // Let's update the coordinate displayed on top right corner
-        top_right_coordinate_display.innerHTML = pointing_lat.toFixed(4) + " N\n" +
-            pointing_lon.toFixed(4) + " E";
+        // console.log(pointing_lat.toFixed(4) + " N\n" + pointing_lon.toFixed(4) + " E");
         height_in_km = canvas.height * zoom_value * 110.574;
         width_in_km = canvas.width * zoom_value * 111.320 * Math.cos(pointing_lat);
-        top_left_scale_display.innerHTML = height_in_km.toFixed(2) + " km height <br> " +
+        sizes_of_the_map.innerHTML = height_in_km.toFixed(2) + " km height " +
             width_in_km.toFixed(2) + " km width\n ";
+    }else{
+        setTimeout(draw_data, 100);
     }
 }
 
@@ -310,12 +333,18 @@ function map_questions_switch(){
     if (maps_is_visible) {
         maps_is_visible = false;
         canvas.style.visibility = "hidden";
+
+        selected_bus_stop_name.style.visibility = "hidden"
+        sizes_of_the_map.style.visibility = "hidden"
+
         let question_map = document.getElementById("question_map");
         question_map.innerHTML = "Mappa"
         questions_panel.style.visibility = "visible"
     }else{
         maps_is_visible = true;
         canvas.style.visibility = "visible";
+        selected_bus_stop_name.style.visibility = "visible"
+        sizes_of_the_map.style.visibility = "visible"
         let question_map = document.getElementById("question_map");
         question_map.innerHTML = "Domande"
         questions_panel.style.visibility = "hidden"
@@ -407,7 +436,6 @@ function scroll_kinetic(){
     if (Math.abs(kinetic_scrolling_speed) > kinetic_scrolling_min_speed){
 
         kinetic_scrolling_speed = kinetic_scrolling_friction*kinetic_scrolling_speed+kinetic_scrolling_speed;
-        console.log(kinetic_scrolling_speed)
         questions_panel.scrollBy({
             top: -kinetic_scrolling_speed/10,
             behavior: "instant"

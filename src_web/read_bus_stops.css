@@ -17,19 +17,20 @@ canvas {
   /*width: 300px;
   height: 300px;*/
   top: 10%;
-  left: 10%;
-  right: 10%;
-  width: 80%;
+  left: 0;
+  width: 100%;
   height: 80%;
   /* border: 2px solid black; */
   background-color: #21edd5;
+  cursor: move;
 }
 
 .btn {
   position: absolute;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #874caf;
+  color: #ff7600;
   cursor: pointer;
+  font-size: 4vh;
   /* border: 2px solid black; */
 }
 
@@ -45,73 +46,17 @@ canvas {
 
 .top-btn {
   top: 0;
-  left: 10%;
-  right: 10%;
-  height: 10%;
-}
-
-.top_right_coordinate_display {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 10%;
-  height: 10%;
-  background-color: rgba(0, 0, 0, 1);
-  color: white; /* text color */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.top_left_scale_display {
-  position: fixed;
-  top: 0;
   left: 0;
-  width: 10%;
-  height: 10%;
-  background-color: rgba(0, 0, 0, 1);
-  color: #e84242; /* text color */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.bottom_right_stop_name_display {
-  position: fixed;
-  bottom: 0;
   right: 0;
-  width: 10%;
   height: 10%;
-  background-color: rgba(0, 0, 0, 1);
-  color: #e8c142; /* text color */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.bottom_left_click_coordinate_display {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 10%;
-  height: 10%;
-  background-color: rgba(0, 0, 0, 1);
-  color: #42e869; /* text color */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
 }
 
 .questions_panel {
   position: absolute;
   top: 10%;
-  left: 10%;
-  bottom: 10%;
-  right: 10%;
+  left: 0;
+  bottom: 0;
+  right: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1%;
@@ -121,19 +66,50 @@ canvas {
 }
 
 .answer{
-  width: 95%;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
-    font-size: 8vw;
+    font-size: 8vh;
 }
 p {
-  font-size: 4vw;
+  font-size: 4vh;
 }
 input {
-  font-size: 4vw;
+  font-size: 4vh;
+}
+
+.selected_bus_stop_name{
+  position: fixed;
+  bottom: 5%;
+  left: 0;
+  width: 100%;
+  height: 5%;
+  background-color: rgb(135, 76, 175);
+  color: #ff7600; /* text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2vh;
+}
+
+.sizes_of_the_map{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5%;
+  background-color: rgb(135, 76, 175);
+  color: #ff7600; /* text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2vh;
 }

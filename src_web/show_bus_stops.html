@@ -13,10 +13,10 @@
     <div class="container">
         <button id="question_map" type="button" class="btn top-btn" onclick="map_questions_switch()">Domande</button>
         <canvas id="myCanvas" class="canvas" height="500" width="500"></canvas>
-        <div id="top_right_coordinate_display" class="top_right_coordinate_display"></div>
-        <div id="top_left_scale_display" class="top_left_scale_display"></div>
-        <div id="bottom_right_stop_name_display" class="bottom_right_stop_name_display"></div>
-        <div id="bottom_left_click_coordinate_display" class="bottom_left_click_coordinate_display"></div>
+
+        <div id="selected_bus_stop_name" class="selected_bus_stop_name"></div>
+        <div id="sizes_of_the_map" class="sizes_of_the_map"></div>
+
         <div id="questions_panel" class="questions_panel">
             <h1>Domanda 1</h1>
             <p>Quante zampe hanno i cavalli?</p>
@@ -170,7 +170,7 @@
                 const ratio = (width / height).toFixed(2); // Mantiene 2 cifre decimali
                 console.log(ratio)
                 const inputBox = document.getElementById("myCanvas");
-                inputBox.setAttribute("width", String(window.innerWidth * 0.8));
+                inputBox.setAttribute("width", String(window.innerWidth));
                 inputBox.setAttribute("height", String(window.innerHeight * 0.8));
                 if (typeof canvas !== 'undefined') {
                     draw_data()
