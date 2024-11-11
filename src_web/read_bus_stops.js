@@ -25,6 +25,10 @@ let pointing_lat = 44.49375;
 const bologna_satellite = new Image;
 let bologna_satellite_loaded = false;
 
+let kinetic_scrolling_speed = 0;
+let kinetic_scrolling_friction = -0.3;
+let kinetic_scrolling_min_speed = 5.0;
+
 let bus_stop_radius = 2;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -85,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let initialDistance = 0;
     let starting_scroll;
     let start_y;
+    let start_t;
 
     canvas.addEventListener("pointerdown", function(event) {
         pointer_down_start_x = event.clientX;
@@ -183,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     questions_panel.addEventListener("click", function(event){
-        console.log("Suca");
+        // console.log("Suca");
         // questions_panel.scrollTo({
         //  top: 100,
         //  behavior: "smooth"
@@ -192,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     questions_panel.addEventListener("pointerdown", function(event) {
         start_y = event.clientY;
+        start_t = Date.now() / 1000;
         mouse_is_pressed = true;
         starting_scroll = questions_panel.scrollTop;
     });
@@ -209,6 +215,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     questions_panel.addEventListener("pointerup", function(event) {
         mouse_is_pressed = false;
+        let end_y = event.clientY;
+        kinetic_scrolling_speed = (end_y - start_y) / (Date.now() / 1000 - start_t);
+        console.log("Starting!")
+        console.log(kinetic_scrolling_speed)
+        scroll_kinetic()
     });
 });
 
@@ -387,4 +398,19 @@ function print_bologna_in_correct_position(ctx, width, height){
         dHeight = canvas.height - dy;
     }
     ctx.drawImage(bologna_satellite, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+}
+
+function scroll_kinetic(){
+    if (Math.abs(kinetic_scrolling_speed) > kinetic_scrolling_min_speed){
+
+        kinetic_scrolling_speed = kinetic_scrolling_friction*kinetic_scrolling_speed+kinetic_scrolling_speed;
+        console.log(kinetic_scrolling_speed)
+        questions_panel.scrollBy({
+            top: -kinetic_scrolling_speed/10,
+            behavior: "instant"
+        });
+        setTimeout(scroll_kinetic, 10);
+    }else{
+        kinetic_scrolling_speed  = 0;
+    }
 }
