@@ -524,7 +524,7 @@ function scroll_kinetic(){
 }
 
 async function ask_for_live_gps(){
-    const response = await fetch("http://" + SERVER_IP + ":4989/live_gps");
+    const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
     const data = await response.json();
     console.log(data)
     live_gps_lat = 0;
