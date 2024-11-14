@@ -10,7 +10,7 @@ const lon_2 = 11.271379;
 // END CALIBRATION
 
 
-SERVER_IP = "137.204.57.32"
+SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
 let maps_is_visible = true;
 
 let canvas;
@@ -524,7 +524,7 @@ function scroll_kinetic(){
 }
 
 async function ask_for_live_gps(){
-    const response = await fetch("http://" + SERVER_IP + ":4989/live_gps");
+    const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
     const data = await response.json();
     console.log(data)
     live_gps_lat = 0;
