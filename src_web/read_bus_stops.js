@@ -1,3 +1,14 @@
+// CALIBRATION
+const px_x_1 = 2442;
+const px_y_1 = 1846;
+const px_x_2 = 634;
+const px_y_2 = 2887;
+const lat_1 = 44.493431;
+const lon_1 = 11.308124;
+const lat_2 = 44.479294;
+const lon_2 = 11.271379;
+// END CALIBRATION
+
 let maps_is_visible = true;
 
 let canvas;
@@ -402,10 +413,20 @@ function map_questions_switch(){
 
 // 4028, 1009 --> 11.342787 44.494055
 // 3000, 514 --> 11.320800 44.501614
-const m_lat_to_y = (1009 - 514) / (44.494055 - 44.501614);
-const q_lat_to_y = (44.494055*514 - 44.501614*1009) / (44.494055  - 44.501614);
-const m_lon_to_x = (4028 - 3000) / (11.342787 - 11.320800);
-const q_lon_to_x = (11.342787 *3000 - 11.320800*4028) / (11.342787 - 11.320800);
+
+
+const a_x1 = lat_1;
+const a_x2 = lat_2;
+const a_y1 = px_y_1;
+const a_y2 = px_y_2;
+const b_x1 = lon_1;
+const b_x2 = lon_2;
+const b_y1 = px_x_1;
+const b_y2 = px_x_2;
+const m_lat_to_y = (a_y1 - a_y2) / (a_x1 - a_x2);
+const q_lat_to_y = (a_x1*a_y2 - a_x2*a_y1) / (a_x1 - a_x2);
+const m_lon_to_x = (b_y1 - b_y2) / (b_x1 - b_x2);
+const q_lon_to_x = (b_x1*b_y2 - b_x2*b_y1) / (b_x1 - b_x2);
 
 function lat_to_y_image(lat){
     return lat*m_lat_to_y  + q_lat_to_y;
