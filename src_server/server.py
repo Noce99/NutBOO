@@ -11,12 +11,6 @@ def get_data():
     return jsonify(data)
 
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    data = {'message': 'Ciao dal server Python!'}
-    return jsonify(data)
-
-
 @app.route('/api/data', methods=['POST'])
 def post_data():
     content = request.json
@@ -36,4 +30,3 @@ if __name__ == '__main__':
     # app.run(port=4989)
     my_gps = GpsLivelox()
     my_gps.listen_forever()
-    
