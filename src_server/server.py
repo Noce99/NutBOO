@@ -14,7 +14,7 @@ def get_data():
 
 @app.route("/live_gps", methods=["GET"])
 def live_gps_aa():
-    data = {"message": f"aaaaa"}
+    data = {"lat": live_gps.lat, "lon": live_gps.lon}
     return jsonify(data)
 
 
@@ -34,5 +34,8 @@ def post_login():
 
 
 if __name__ == '__main__':
+    live_gps.thread.start()
+    print("After the thread!")
     app.run(host="0.0.0.0", ssl_context=('cert1.pem', 'privkey1.pem'), port=4989)
-    #live_gps.listen_forever()
+
+

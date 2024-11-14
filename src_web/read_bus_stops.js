@@ -31,7 +31,7 @@ let sizes_of_the_map;
 
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM = 0.00008;
+const MAX_ZOOM = 0.001; // 0.00008;
 let zoom_value = MAX_ZOOM; // deg / px
 const MIN_LON = 11.256635603112843;
 const MAX_LON = 11.365479808365757;
@@ -370,6 +370,14 @@ function draw_data(){
             ctx.fillStyle = color;
             ctx.fill();
         }
+        // LIVE GPS
+        ctx.beginPath();
+        ctx.arc(lon_to_x(parseFloat(live_gps_lon)), lat_to_y(parseFloat(live_gps_lat)),
+            10, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgb(95,255,0)';
+        ctx.fill();
+
         ctx.beginPath();
         ctx.moveTo(canvas.width / 2 - 0.01 * canvas.width, canvas.height / 2);
         ctx.lineTo(canvas.width / 2 + 0.01 * canvas.width, canvas.height / 2);
@@ -526,9 +534,13 @@ function scroll_kinetic(){
 async function ask_for_live_gps(){
     const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
     const data = await response.json();
-    console.log(data)
-    live_gps_lat = 0;
-    live_gps_lon = 0;
-    // console.log(live_gps_lat  + " " + live_gps_lon)
-    setTimeout(ask_for_live_gps, 500);
+    let old_live_gps_lat = live_gps_lat;
+    let old_live_gps_lon = live_gps_lon;
+    live_gps_lat = data["lat"];
+    live_gps_lon = data["lon"];
+    console.log(live_gps_lat + " " + live_gps_lon)
+    setTimeout(ask_for_live_gps, 3000);
+    if (old_live_gps_lat !== live_gps_lat || old_live_gps_lon !== live_gps_lon){
+        draw_data();
+    }
 }

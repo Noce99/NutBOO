@@ -1,4 +1,5 @@
 import socket
+from threading import Thread
 
 
 class GpsLivelox:
@@ -11,6 +12,8 @@ class GpsLivelox:
         self.server_socket.bind((host, port))
         self.lon = None
         self.lat = None
+
+        self.thread = Thread(target=self.listen_forever)
 
     def listen_forever(self):
         while True:
