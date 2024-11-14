@@ -9,6 +9,8 @@ const lat_2 = 44.479294;
 const lon_2 = 11.271379;
 // END CALIBRATION
 
+
+SERVER_IP = "137.204.57.32"
 let maps_is_visible = true;
 
 let canvas;
@@ -53,6 +55,9 @@ let bus_stop_radius = bus_stop_minimum_radius;
 
 let map_left, map_top, map_right, map_bottom;
 
+let live_gps_lat;
+let live_gps_lon;
+
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
     fetchJSONQA();
@@ -77,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
     map_top = map_rect.top;
     map_right = map_rect.right;
     map_bottom = map_rect.bottom;
+
+    setTimeout(ask_for_live_gps, 500);
 
     canvas.addEventListener("click", function(event) {
         const rect = canvas.getBoundingClientRect();
@@ -514,4 +521,14 @@ function scroll_kinetic(){
     }else{
         kinetic_scrolling_speed  = 0;
     }
+}
+
+async function ask_for_live_gps(){
+    const response = await fetch("http://" + SERVER_IP + ":4989/live_gps");
+    const data = await response.json();
+    console.log(data)
+    live_gps_lat = 0;
+    live_gps_lon = 0;
+    // console.log(live_gps_lat  + " " + live_gps_lon)
+    setTimeout(ask_for_live_gps, 500);
 }

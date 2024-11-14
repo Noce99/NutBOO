@@ -22,8 +22,8 @@ class GpsLivelox:
             message = message.encode('utf-8')
             conn.send(message)
             data = conn.recv(1280)
-            self.lat = self.coordinate_formater(data.hex()[38:46])
-            self.lon = self.coordinate_formater(data.hex()[46:54])
+            self.lon = self.coordinate_formater(data.hex()[38:46])
+            self.lat = self.coordinate_formater(data.hex()[46:54])
             print(f"{self.lat} N  {self.lon} E")
             conn.close()
 

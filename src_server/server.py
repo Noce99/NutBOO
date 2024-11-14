@@ -3,11 +3,18 @@ from flask_cors import CORS
 from get_info_gps import GpsLivelox
 app = Flask(__name__)
 CORS(app)
+live_gps = GpsLivelox()
 
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
     data = {'message': 'Ciao dal server Python!'}
+    return jsonify(data)
+
+
+@app.route("/live_gps", methods=["GET"])
+def get_data():
+    data = {"lat": live_gps.lat, "lon": live_gps.lon}
     return jsonify(data)
 
 
@@ -27,6 +34,5 @@ def post_login():
 
 
 if __name__ == '__main__':
-    # app.run(port=4989)
-    my_gps = GpsLivelox()
-    my_gps.listen_forever()
+    app.run(port=4989)
+    # live_gps.listen_forever()
