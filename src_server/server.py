@@ -13,7 +13,7 @@ def get_data():
 
 
 @app.route("/live_gps", methods=["GET"])
-def get_data():
+def live_gps():
     data = {"lat": live_gps.lat, "lon": live_gps.lon}
     return jsonify(data)
 
