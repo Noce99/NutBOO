@@ -12,6 +12,8 @@ const lon_2 = 11.271379;
 
 const SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
 
+let passcode;
+
 let maps_is_visible = true;
 
 let canvas;
@@ -64,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const url_parameters = new URLSearchParams(window.location.search);
     let team_name = document.getElementById("team_name");
     team_name.innerHTML = url_parameters.get("team_name")
+    passcode = url_parameters.get("passcode")
 
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
@@ -309,6 +312,17 @@ async function fetchJSONQA() {
             newI.type = "text";
             newI.classList.add("answer");
             newI.id = "answer_" + qa[i]["question_id"].toString();
+            newI.addEventListener("input", function() {
+                const text = newI.value;
+                fetch("https://" + SERVER_IP + ":4989/answer", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({"passcode": passcode, "answer_id": qa[i]["question_id"], "answer": text})
+                });
+            });
+
             divElement.appendChild(newI);
         } else {
             const newI = document.createElement("input");
