@@ -60,9 +60,12 @@ def post_answer():
         print(answers)
         if team_name not in answers.keys():
             answers[team_name] = {}
+        print(answers)
         if answer_id not in answers[team_name].keys():
             answers[team_name][answer_id] = []
+        print(answers)
         answers[team_name][answer_id].append(answer)
+        print(answers)
         with open("answers.json", "w") as answers_file:
             answers_file.write(json.dumps(answers, indent=4))
         response = {"Accepted": answer_id}
