@@ -46,8 +46,15 @@ canvas {
 
 .top-btn {
   top: 0;
-  left: 0;
+  left: 30%;
   right: 0;
+  height: 10%;
+}
+
+.team_button{
+  top: 0;
+  left: 0;
+  right: 70%;
   height: 10%;
 }
 

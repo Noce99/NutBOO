@@ -10,7 +10,8 @@ const lon_2 = 11.271379;
 // END CALIBRATION
 
 
-SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
+const SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
+
 let maps_is_visible = true;
 
 let canvas;
@@ -60,6 +61,10 @@ let live_gps_lon;
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
     fetchJSONQA();
+    const url_parameters = new URLSearchParams(window.location.search);
+    let team_name = document.getElementById("team_name");
+    team_name.innerHTML = url_parameters.get("team_name")
+    
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
     draw_data();
