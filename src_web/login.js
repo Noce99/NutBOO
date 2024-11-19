@@ -24,7 +24,7 @@ async function postPassCode(passcode) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({message: passcode})
+        body: JSON.stringify({"passcode": passcode})
     });
     const data = await response.json();
     console.log("POSTPassCode response:", data);

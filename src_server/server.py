@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from get_info_gps import GpsLivelox
+import json
 app = Flask(__name__)
 CORS(app)
 live_gps = GpsLivelox()
@@ -28,8 +29,14 @@ def post_data():
 @app.route('/login', methods=['POST'])
 def post_login():
     content = request.json
-    print(content)
-    response = {"team": "scappati di casa"}
+    tried_passcode = content["passcode"]
+    print(f"LogIn Attempt -> {tried_passcode}")
+    with open("teams.json", "r") as teams_file:
+        users = json.load(teams_file)
+    if tried_passcode in users.keys():
+        response = {"team": users[tried_passcode]}
+    else:
+        response = {"team": "Unknown"}
     return jsonify(response)
 
 
