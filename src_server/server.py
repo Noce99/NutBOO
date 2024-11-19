@@ -6,8 +6,6 @@ app = Flask(__name__)
 CORS(app)
 live_gps = GpsLivelox()
 
-QA = None
-
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
@@ -43,11 +41,11 @@ def post_login():
 
 @app.route("/qa", methods=["GET"])
 def get_qa():
-    return jsonify(QA)
+    with open("questions_and_answers.json", "r") as qa_file:
+        qa = json.load(qa_file)
+    return jsonify(qa)
 
 if __name__ == '__main__':
-    with open("questions_and_answers.json", "r") as qa_file:
-        QA = json.load(qa_file)
     live_gps.thread.start()
     app.run(host="0.0.0.0", ssl_context=('cert1.pem', 'privkey1.pem'), port=4989)
 
