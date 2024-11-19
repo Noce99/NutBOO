@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const url_parameters = new URLSearchParams(window.location.search);
     let team_name = document.getElementById("team_name");
     team_name.innerHTML = url_parameters.get("team_name")
-    
+
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
     draw_data();
