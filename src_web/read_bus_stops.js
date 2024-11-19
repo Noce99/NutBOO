@@ -313,14 +313,7 @@ async function fetchJSONQA() {
             newI.classList.add("answer");
             newI.id = "answer_" + qa[i]["question_id"].toString();
             newI.addEventListener("input", function() {
-                const text = newI.value;
-                fetch("https://" + SERVER_IP + ":4989/answer", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({"passcode": passcode, "answer_id": qa[i]["question_id"], "answer": text})
-                });
+                send_answer(passcode, qa[i]["question_id"], newI.value);
             });
 
             divElement.appendChild(newI);
@@ -552,4 +545,14 @@ async function ask_for_live_gps(){
     if (old_live_gps_lat !== live_gps_lat || old_live_gps_lon !== live_gps_lon){
         draw_data();
     }
+}
+
+function send_answer(passcode, answer_id, answer){
+    fetch("https://" + SERVER_IP + ":4989/answer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer})
+    });
 }
