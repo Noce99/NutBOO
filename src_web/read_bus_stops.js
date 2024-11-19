@@ -30,7 +30,7 @@ let sizes_of_the_map;
 
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM = 0.001; // 0.00008;
+const MAX_ZOOM = 0.00008; // 0.001; to see Sasso!
 let zoom_value = MAX_ZOOM; // deg / px
 const MIN_LON = 11.256635603112843;
 const MAX_LON = 11.365479808365757;
