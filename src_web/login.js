@@ -1,3 +1,5 @@
+SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
+
 async function getData() {
     const response = await fetch('http://127.0.0.1:4989/api/data');
     const data = await response.json();
