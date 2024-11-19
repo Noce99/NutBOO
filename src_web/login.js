@@ -33,11 +33,12 @@ async function postPassCode(passcode) {
 
 async function login(){
     let input = document.getElementById("passcode");
-    let answer = await postPassCode(input.value);
-    if (answer != "Unknown") {
+    const passcode = input.value
+    let answer = await postPassCode(passcode);
+    if (answer !== "Unknown") {
         input.value = "";
-        const encoded_answer = encodeURIComponent(answer);
-        window.location.href = `show_bus_stops.html?passcode=${encoded_answer}`;
+        const encoded_passcode = encodeURIComponent(passcode);
+        window.location.href = `show_bus_stops.html?passcode=${encoded_passcode}`;
     }else{
         input.value = "This passcode doesn't exists! Please try again!";
     }

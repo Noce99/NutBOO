@@ -21,7 +21,6 @@ let data;
 let loaded_data = false;
 
 let qa; // questions and answers
-let loaded_qa = false;
 
 let height_in_km;
 let width_in_km;
@@ -286,50 +285,41 @@ function fetchJSONData() {
     );
 }
 
-function fetchJSONQA() {
-    fetch("questions_and_answers.json").then((res) => {
-        if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
-    }).then((my_qa) => {
-        qa=my_qa;
-        loaded_qa = true;
-        let divElement = document.getElementById("questions_panel");
-        for (let i = 0; i < qa.length; i++) {
-            console.log(qa[i]);
-            const newH1 = document.createElement("h1");
-            newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
-            const newP = document.createElement("p");
-            newP.innerHTML = qa[i]["question"].toString();
-            divElement.appendChild(newH1);
-            divElement.appendChild(newP);
+async function fetchJSONQA() {
+    const response = await fetch("https://" + SERVER_IP + ":4989/qa");
+    const qa = await response.json();
+    console.log("QA:", qa);
+    let divElement = document.getElementById("questions_panel");
+    for (let i = 0; i < qa.length; i++) {
+        console.log(qa[i]);
+        const newH1 = document.createElement("h1");
+        newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
+        const newP = document.createElement("p");
+        newP.innerHTML = qa[i]["question"].toString();
+        divElement.appendChild(newH1);
+        divElement.appendChild(newP);
 
-            if (qa[i]["type_of_answer"] === "text"){
-                const newI = document.createElement("input");
-                newI.type = "text";
-                newI.classList.add("answer");
-                newI.id = "answer_"+qa[i]["question_id"].toString();
-                divElement.appendChild(newI);
-            }else{
-                const newI = document.createElement("input");
-                newI.type = "file";
-                newI.classList.add("answer_file");
-                newI.id = "answer_"+qa[i]["question_id"].toString();
-                divElement.appendChild(newI);
-                const newB = document.createElement("button");
-                newB.classList.add("answer-button");
-                newB.onclick = () => {
-                    document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
-                };
-                newB.innerHTML = "Select an Image";
-                divElement.appendChild(newB);
-            }
-
+        if (qa[i]["type_of_answer"] === "text") {
+            const newI = document.createElement("input");
+            newI.type = "text";
+            newI.classList.add("answer");
+            newI.id = "answer_" + qa[i]["question_id"].toString();
+            divElement.appendChild(newI);
+        } else {
+            const newI = document.createElement("input");
+            newI.type = "file";
+            newI.classList.add("answer_file");
+            newI.id = "answer_" + qa[i]["question_id"].toString();
+            divElement.appendChild(newI);
+            const newB = document.createElement("button");
+            newB.classList.add("answer-button");
+            newB.onclick = () => {
+                document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
+            };
+            newB.innerHTML = "Select an Image";
+            divElement.appendChild(newB);
         }
-    }).catch((error) =>
-        console.error("Unable to fetch data:", error)
-    );
+    }
 }
 
 function lon_to_x(lon) {
