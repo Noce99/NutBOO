@@ -53,7 +53,7 @@ def post_answer():
         users = json.load(teams_file)
     if tried_passcode in users.keys():
         team_name =  users[tried_passcode]
-        answer_id = int(content["answer_id"])
+        answer_id = str(content["answer_id"])
         answer = content["answer"]
         with open("answers.json", "r") as answers_file:
             answers = json.load(answers_file)
