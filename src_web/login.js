@@ -27,12 +27,18 @@ async function postPassCode(passcode) {
         body: JSON.stringify({"passcode": passcode})
     });
     const data = await response.json();
-    console.log("POSTPassCode response:", data);
+    console.log("POSTPassCode response:", data["team"]);
     return data["team"]
 }
 
-function login(){
+async function login(){
     let input = document.getElementById("passcode");
-    let answer = postPassCode(input.value);
-    input.innerHTML = answer
+    let answer = await postPassCode(input.value);
+    if (answer != "Unknown") {
+        input.value = "";
+        const encoded_answer = encodeURIComponent(answer);
+        window.location.href = `show_bus_stops.html?passcode=${encoded_answer}`;
+    }else{
+        input.value = "This passcode doesn't exists! Please try again!";
+    }
 }
