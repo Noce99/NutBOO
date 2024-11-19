@@ -61,6 +61,7 @@ def post_answer():
             answers[team_name] = {}
         if answer_id not in answers[team_name].keys():
             answers[team_name][answer_id] = []
+        print(answers[team_name][answer_id])
         answers[team_name][answer_id].append(answer)
         print(answers[team_name][answer_id])
         with open("answers.json", "w") as answers_file:
