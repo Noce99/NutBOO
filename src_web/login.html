@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, viewport-fit=cover, initial-scale=1.0, user-scalable=no">
+    <script type="text/javascript" src="login.js"></script>
     <link rel="stylesheet" href="login.css">
     <title>BOO Login</title>
 </head>
@@ -10,44 +11,5 @@
 <h1 class="text">PassCode:</h1>
 <input type="text" id="passcode" class="input"/>
 <button class="button" onclick="login()">Log-In</button>
-<script>
-        async function getData() {
-            const response = await fetch('http://127.0.0.1:4989/api/data');
-            const data = await response.json();
-            console.log('GET response:', data);
-        }
-
-        async function postData() {
-            const response = await fetch('http://127.0.0.1:4989/api/data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({message: 'Hallo from JavaScript!'})
-            });
-            const data = await response.json();
-            console.log('POST response:', data);
-        }
-
-        async function postPassCode(passcode) {
-            const response = await fetch("http://127.0.0.1:4989/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({message: passcode})
-            });
-            const data = await response.json();
-            console.log("POSTPassCode response:", data);
-        }
-
-        function login(){
-            let input = document.getElementById("passcode");
-            postPassCode(input.value);
-        }
-
-        getData();
-        postData();
-</script>
 </body>
 </html>

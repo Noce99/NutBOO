@@ -29,13 +29,12 @@ def post_data():
 def post_login():
     content = request.json
     print(content)
-    response = {'received': content}
+    response = {"team": "scappati di casa"}
     return jsonify(response)
 
 
 if __name__ == '__main__':
     live_gps.thread.start()
-    print("After the thread!")
     app.run(host="0.0.0.0", ssl_context=('cert1.pem', 'privkey1.pem'), port=4989)
 
 
