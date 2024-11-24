@@ -60,7 +60,17 @@ def post_answer():
         {"passcode": tried_passcode, "answers.question_id": answer_id},
         {"$push": {"answers.$.answer": answer}}
     )
-    print(result.modified_count)
+    if result.modified_count == 0:
+        found_questions = list(QUESTIONS.find(
+            {"question_id": answer_id}
+        ))
+        if len(found_questions) > 1:
+            print(f"WTF! More than one question with same id: {answer_id}!")
+        elif len(found_questions) == 1:
+            TEAMS.update_one(
+                {"passcode": tried_passcode},
+                {"$push": {"answers": {"question_id": answer_id, "answer": [answer]}}}
+            )
     return "OK", 200
 
 if __name__ == '__main__':
