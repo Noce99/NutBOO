@@ -566,6 +566,7 @@ async function ask_for_live_gps(){
             console.log(`${gps_name} -> [${time}, ${lat} N, ${lon} E]`);
             gpses_to_print.push([gps_name, time, lat, lon])
         }
+        draw_data()
     }else{
         console.log(await response.text());
     }
