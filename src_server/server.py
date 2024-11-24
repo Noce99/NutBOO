@@ -60,7 +60,7 @@ def post_answer():
         {"passcode": tried_passcode, "answers.question_id": answer_id},
         {"$push": {"answers.$.answer": answer}}
     )
-    print(result)
+    print(result.modified_count)
     return "OK", 200
 
 if __name__ == '__main__':
