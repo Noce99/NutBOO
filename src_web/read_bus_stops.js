@@ -544,10 +544,12 @@ async function ask_for_live_gps(){
     if (response.status === 200) {
         const data = await response.json();
         for (let i = 0; i < data.length; i++) {
-            console.log(data[i])
-            const gps_name = data[i]["gps_name"]
-            const location = data[i]["location"][0]
-            console.log(`${gps_name} -> ${location}`)
+            console.log(data[i]);
+            const gps_name = data[i]["gps_name"];
+            const time = data[i]["location"][0]["time"];
+            const lat = data[i]["location"][0]["lat"];
+            const lon = data[i]["location"][0]["lon"];
+            console.log(`${gps_name} -> [${time}, ${lat} N, ${lon} E]`);
         }
         /*
         let old_live_gps_lat = live_gps_lat;
