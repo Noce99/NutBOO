@@ -19,6 +19,7 @@ GPS = db["gps"]
 @app.route("/live_gps", methods=["POST"])
 def get_live_gps_data():
     content = request.json
+    print(content)
     if "gps_id" not in content:
         return "You should specify a gps_id!", 400
     gps_id = content["gps_id"]
