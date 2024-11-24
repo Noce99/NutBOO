@@ -376,16 +376,20 @@ function draw_data(){
             ctx.beginPath();
             const an_x = lon_to_x(parseFloat(gpses_to_print[ii][3]));
             const an_y = lat_to_y(parseFloat(gpses_to_print[ii][2]));
+            const gps_name = gpses_to_print[ii][0];
+            let textMetrics = ctx.measureText(gps_name);
+            let textWidth = textMetrics.width;
             ctx.arc(an_x, an_y,10, 0, 2 * Math.PI);
             ctx.closePath();
             ctx.fillStyle = 'rgb(95,255,0)';
             ctx.fill();
+            ctx.strokeStyle = 'rgb(0,0,0)'; // Colore del bordo del rettangolo
+            ctx.lineWidth = 2;
+            ctx.strokeRect(an_x, an_y - textMetrics.actualBoundingBoxAscent, textWidth,
+                textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
             ctx.fillStyle = 'rgb(209,93,15)';
             ctx.font = "30px Arial";
-            ctx.fillText(gpses_to_print[ii][0],an_x,an_y);
-            ctx.fillStyle = 'rgb(0,0,0)';
-            ctx.font = "40px Arial";
-            ctx.fillText(gpses_to_print[ii][0],an_x,an_y);
+            ctx.fillText(gps_name,an_x,an_y);
         }
 
 
