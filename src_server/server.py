@@ -47,7 +47,7 @@ def post_login():
 
 @app.route("/qa", methods=["GET"])
 def get_qa():
-    questions = QUESTIONS.find()
+    questions = list(QUESTIONS.find())
     return jsonify(questions)
 
 @app.route('/answer', methods=['POST'])
