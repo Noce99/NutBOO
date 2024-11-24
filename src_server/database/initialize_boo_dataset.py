@@ -20,8 +20,8 @@ if __name__ == "__main__":
         "name": "Admin",
         "passcode": "svettavento",
         "admin": True,
-        "answers": [{"question_id": "-2", "answer": "10"},
-                    {"question_id": "-1", "answer": "/home/enrico/Images/bho.jpg"},],
+        "answers": [{"question_id": "-2", "answer": ["10"]},
+                    {"question_id": "-1", "answer": ["/home/enrico/Images/bho.jpg"]},],
     }
 
     test_team = {
