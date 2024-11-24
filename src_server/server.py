@@ -28,7 +28,7 @@ def get_live_gps_data():
         return "To many GPS whit this gps_id! WTF?", 400
     my_gps = found_gps[0]
     last_position = my_gps["location"][-1]
-    return jsonify(last_position)
+    return jsonify(last_position), 200
 
 @app.route('/login', methods=['POST'])
 def post_login():

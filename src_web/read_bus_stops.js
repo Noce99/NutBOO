@@ -535,6 +535,7 @@ function scroll_kinetic(){
 
 async function ask_for_live_gps(){
     const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
+    console.log(response.status)
     const data = await response.json();
     let old_live_gps_lat = live_gps_lat;
     let old_live_gps_lon = live_gps_lon;
