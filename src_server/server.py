@@ -19,18 +19,20 @@ GPS = db["gps"]
 @app.route("/live_gps", methods=["POST"])
 def get_live_gps_data():
     content = request.json
-    print(content)
-    if "gps_id" not in content:
-        return "You should specify a gps_id!", 400
-    gps_id = str(content["gps_id"])
-    found_gps = list(GPS.find({"gps_id": gps_id}))
-    if len(found_gps) == 0:
-        return "No GPS whit this gps_id!", 400
-    if len(found_gps) > 1:
-        return "To many GPS whit this gps_id! WTF?", 400
-    my_gps = found_gps[0]
-    last_position = my_gps["location"][-1]
-    return jsonify(last_position), 200
+    tried_passcode = content["passcode"]
+    found_teams = list(TEAMS.find({"passcode": tried_passcode}))
+    if len(found_teams) == 0:
+        return "Unknown passcode", 400
+    if len(found_teams) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+
+    my_team = found_teams[0]
+    admin = my_team["admin"]
+    if admin:
+        gps = list(GPS.find({}, {"_id": 0}))
+    else:
+        gps = list(GPS.find({"question_gps": True}, {"_id": 0}))
+    return jsonify(gps), 200
 
 @app.route("/login", methods=["POST"])
 def post_login():
