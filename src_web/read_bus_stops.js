@@ -379,8 +379,13 @@ function draw_data(){
             ctx.closePath();
             ctx.fillStyle = 'rgb(95,255,0)';
             ctx.fill();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 5;
             ctx.fillStyle = 'rgb(209,93,15)';
             ctx.font = "30px Arial";
+            ctx.strokeText(gpses_to_print[ii][0],
+                lon_to_x(parseFloat(gpses_to_print[ii][3])),
+                lat_to_y(parseFloat(gpses_to_print[ii][2])));
             ctx.fillText(gpses_to_print[ii][0],
                 lon_to_x(parseFloat(gpses_to_print[ii][3])),
                 lat_to_y(parseFloat(gpses_to_print[ii][2])));
