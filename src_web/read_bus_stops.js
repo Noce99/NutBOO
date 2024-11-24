@@ -544,6 +544,7 @@ async function ask_for_live_gps(){
     if (response.status === 200) {
         const data = await response.json();
         for (let i = 0; i < data.length; i++) {
+            console.log(data[i])
             const gps_name = data[i]["gps_name"]
             const location = data[i]["location"][0]
             console.log(`${gps_name} -> ${location}`)
