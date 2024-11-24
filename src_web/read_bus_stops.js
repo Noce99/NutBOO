@@ -551,7 +551,7 @@ async function ask_for_live_gps(){
     });
     if (response.status === 200) {
         const data = await response.json();
-        gpses_to_print.clear()
+        gpses_to_print.length = 0;
         for (let i = 0; i < data.length; i++) {
             const gps_name = data[i]["gps_name"];
             const time = data[i]["location"][0]["time"];
