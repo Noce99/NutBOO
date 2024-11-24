@@ -46,14 +46,14 @@ if __name__ == "__main__":
     test_test_question = {
         "question_id": -2,
         "question": "How many l in Marcello?",
-        "answers": ["2", "4", "10"],
+        "answer": "2",
         "type_of_answer": "text"
     }
 
     test_image_question = {
         "question_id": -1,
         "question": "An amazing picture!",
-        "answers": ["NO CORRECT ANSWER TO PICTURES"],
+        "answer": "NO CORRECT ANSWER TO PICTURES",
         "type_of_answer": "photo"
     }
 

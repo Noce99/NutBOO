@@ -53,30 +53,14 @@ def get_qa():
 @app.route('/answer', methods=['POST'])
 def post_answer():
     content = request.json
-    tried_passcode = content["passcode"]
-    with open("teams.json", "r") as teams_file:
-        users = json.load(teams_file)
-    if tried_passcode in users.keys():
-        team_name =  users[tried_passcode]
-        answer_id = str(content["answer_id"])
-        answer = content["answer"]
-        with open("answers.json", "r") as answers_file:
-            answers = json.load(answers_file)
-        print(answers)
-        if team_name not in answers.keys():
-            answers[team_name] = {}
-        print(answers)
-        if answer_id not in answers[team_name].keys():
-            answers[team_name][answer_id] = []
-        print(answers)
-        answers[team_name][answer_id].append(answer)
-        print(answers)
-        with open("answers.json", "w") as answers_file:
-            answers_file.write(json.dumps(answers, indent=4))
-        response = {"Accepted": answer_id}
-    else:
-        response = {"team": "Unknown"}
-    return jsonify(response)
+    tried_passcode = str(content["passcode"])
+    answer_id = str(content["answer_id"])
+    answer = str(content["answer"])
+    TEAMS.update_one(
+        {"passcode": tried_passcode},
+        {"$push": {"answers": {'question_id': answer_id, 'answer': answer}}}
+    )
+
 
 if __name__ == '__main__':
     live_gps.thread.start()
