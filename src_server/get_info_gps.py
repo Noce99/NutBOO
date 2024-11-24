@@ -35,10 +35,10 @@ class GpsLivelox:
             print(codec_id)
             print(int.from_bytes(number_of_data, "big"))
             num_of_data = int.from_bytes(number_of_data, "big")
-            timestamp = data[10:18]
-            priority = data[18:19]
-            lon = data[19:23]
-            lat = data[23:25]
+            timestamp = int.from_bytes(data[10:18], "big")
+            priority = int.from_bytes(data[18:19])
+            lon = int.from_bytes(data[19:23])
+            lat = int.from_bytes(data[23:25])
             print(f"{timestamp} {priority} {lon} {lat}")
             self.lon = self.coordinate_formater(data.hex()[38:46])
             self.lat = self.coordinate_formater(data.hex()[46:54])
