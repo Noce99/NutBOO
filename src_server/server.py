@@ -2,28 +2,33 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from get_info_gps import GpsLivelox
 import json
+from pymongo import MongoClient
+
+YEAR = 2024
+
 app = Flask(__name__)
 CORS(app)
 live_gps = GpsLivelox()
-
-
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    data = {'message': 'Ciao dal server Python!'}
-    return jsonify(data)
-
+client = MongoClient('mongodb://localhost:27017/')
+db = client[f"boo{YEAR}"]
+# Collections:
+TEAMS = db["teams"]
+QUESTIONS = db["questions"]
+GPS = db["gps"]
 
 @app.route("/live_gps", methods=["GET"])
-def live_gps_aa():
-    data = {"lat": live_gps.lat, "lon": live_gps.lon}
-    return jsonify(data)
-
-
-@app.route('/api/data', methods=['POST'])
-def post_data():
-    content = request.json
-    response = {'received': content}
-    return jsonify(response)
+def get_live_gps_data():
+    gps_id = request.args.get("gps_id", default="", type=str)
+    if gps_id == "":
+        return "You should specify a gps_id!", 400
+    found_gps = list(GPS.find({"gps_id": gps_id}))
+    if len(found_gps) == 0:
+        return "No GPS whit this gps_id!", 400
+    if len(found_gps) > 1:
+        return "To many GPS whit this gps_id! WTF?", 400
+    my_gps = found_gps[0]
+    last_position = my_gps["location"][-1]
+    return jsonify(last_position)
 
 
 @app.route('/login', methods=['POST'])
@@ -31,12 +36,14 @@ def post_login():
     content = request.json
     tried_passcode = content["passcode"]
     print(f"LogIn Attempt -> {tried_passcode}")
-    with open("teams.json", "r") as teams_file:
-        users = json.load(teams_file)
-    if tried_passcode in users.keys():
-        response = {"team": users[tried_passcode]}
-    else:
+    found_teams = list(TEAMS.find({"passcode": tried_passcode}))
+    if len(found_teams) == 0:
         response = {"team": "Unknown"}
+    elif len(found_teams) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    else:
+        my_team = found_teams[0]
+        response = {"team": my_team["name"]}
     return jsonify(response)
 
 @app.route("/qa", methods=["GET"])
