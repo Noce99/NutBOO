@@ -34,10 +34,18 @@ class GpsLivelox:
             print(data_field_lenght)
             print(codec_id)
             print(int.from_bytes(number_of_data, "big"))
-            print(int.from_bytes(number_of_data, "little"))
+            num_of_data = int.from_bytes(number_of_data, "big")
+            timestamp = data[10:18]
+            priority = data[18:19]
+            lon = data[19:23]
+            lat = data[23:25]
+            print(f"{timestamp} {priority} {lon} {lat}")
             self.lon = self.coordinate_formater(data.hex()[38:46])
             self.lat = self.coordinate_formater(data.hex()[46:54])
             print(f"{self.lat} N  {self.lon} E")
+            message = '\x01'
+            message = message.encode('utf-8')
+            conn.send(message)
             conn.close()
 
     @staticmethod
