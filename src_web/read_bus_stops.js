@@ -558,7 +558,7 @@ async function ask_for_live_gps(){
             const lat = data[i]["location"][0]["lat"];
             const lon = data[i]["location"][0]["lon"];
             console.log(`${gps_name} -> [${time}, ${lat} N, ${lon} E]`);
-            gpses_to_print.append([gps_name, time, lat, lon])
+            gpses_to_print.push([gps_name, time, lat, lon])
         }
     }else{
         console.log(await response.text());
