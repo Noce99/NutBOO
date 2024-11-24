@@ -20,11 +20,12 @@ class GpsLivelox:
             self.server_socket.listen(2)
             conn, address = self.server_socket.accept()
             print("Connection from: " + str(address))
-            conn.recv(1280)
+            gps_id = conn.recv(1280)
             message = '\x01'
             message = message.encode('utf-8')
             conn.send(message)
             data = conn.recv(1280)
+            print(len(data))
             self.lon = self.coordinate_formater(data.hex()[38:46])
             self.lat = self.coordinate_formater(data.hex()[46:54])
             print(f"{self.lat} N  {self.lon} E")
