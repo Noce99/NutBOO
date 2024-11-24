@@ -22,7 +22,7 @@ def get_live_gps_data():
     print(content)
     if "gps_id" not in content:
         return "You should specify a gps_id!", 400
-    gps_id = content["gps_id"]
+    gps_id = str(content["gps_id"])
     found_gps = list(GPS.find({"gps_id": gps_id}))
     if len(found_gps) == 0:
         return "No GPS whit this gps_id!", 400
