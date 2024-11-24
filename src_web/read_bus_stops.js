@@ -534,7 +534,17 @@ function scroll_kinetic(){
 }
 
 async function ask_for_live_gps(){
-    const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
+    // const response = await fetch("https://" + SERVER_IP + ":4989/live_gps");
+    const data = {
+        "gps_id": -1,
+    };
+    const response = await fetch(`https://${SERVER_IP}:4989/live_gps`, {
+        method: 'GET',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
     if (response.status === 200) {
         const data = await response.json();
         let old_live_gps_lat = live_gps_lat;
