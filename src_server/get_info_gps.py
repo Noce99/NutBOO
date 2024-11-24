@@ -33,7 +33,7 @@ class GpsLivelox:
             print(preamble)
             print(data_field_lenght)
             print(codec_id)
-            print(number_of_data)
+            print(int(number_of_data))
             self.lon = self.coordinate_formater(data.hex()[38:46])
             self.lat = self.coordinate_formater(data.hex()[46:54])
             print(f"{self.lat} N  {self.lon} E")
