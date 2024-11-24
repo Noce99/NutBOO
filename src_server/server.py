@@ -32,7 +32,7 @@ def get_live_gps_data():
         gps = list(GPS.find({},
                             {"_id": 0, "gps_name": 1, "location": {"$slice": -1}}))
     else:
-        gps = list(GPS.find({},
+        gps = list(GPS.find({"question_gps": True},
                             {"_id": 0, "gps_name": 1, "location": {"$slice": -1}}))
     return jsonify(gps), 200
 
