@@ -57,8 +57,7 @@ let bus_stop_radius = bus_stop_minimum_radius;
 
 let map_left, map_top, map_right, map_bottom;
 
-let live_gps_lat;
-let live_gps_lon;
+gpses_to_print = []
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
@@ -373,13 +372,22 @@ function draw_data(){
             ctx.fill();
         }
         // LIVE GPS
-        ctx.beginPath();
-        ctx.arc(lon_to_x(parseFloat(live_gps_lon)), lat_to_y(parseFloat(live_gps_lat)),
-            10, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.fillStyle = 'rgb(95,255,0)';
-        ctx.fill();
+        for (let ii=0; ii<gpses_to_print.length; ii++){
+            ctx.beginPath();
+            ctx.arc(lon_to_x(parseFloat(gpses_to_print[ii][3])), lat_to_y(parseFloat(gpses_to_print[ii][2])),
+                10, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = 'rgb(95,255,0)';
+            ctx.fill();
+            ctx.fillStyle = 'rgb(209,93,15)';
+            ctx.font = "30px Arial";
+            ctx.fillText(gpses_to_print[ii][0],
+                lon_to_x(parseFloat(gpses_to_print[ii][3])),
+                lat_to_y(parseFloat(gpses_to_print[ii][2])));
+        }
 
+
+        // POINTER
         ctx.beginPath();
         ctx.moveTo(canvas.width / 2 - 0.01 * canvas.width, canvas.height / 2);
         ctx.lineTo(canvas.width / 2 + 0.01 * canvas.width, canvas.height / 2);
@@ -543,24 +551,15 @@ async function ask_for_live_gps(){
     });
     if (response.status === 200) {
         const data = await response.json();
+        gpses_to_print.clear()
         for (let i = 0; i < data.length; i++) {
-            console.log(data[i]);
             const gps_name = data[i]["gps_name"];
             const time = data[i]["location"][0]["time"];
             const lat = data[i]["location"][0]["lat"];
             const lon = data[i]["location"][0]["lon"];
             console.log(`${gps_name} -> [${time}, ${lat} N, ${lon} E]`);
+            gpses_to_print.append([gps_name, time, lat, lon])
         }
-        /*
-        let old_live_gps_lat = live_gps_lat;
-        let old_live_gps_lon = live_gps_lon;
-        live_gps_lat = data["lat"];
-        live_gps_lon = data["lon"];
-        console.log(live_gps_lat + " " + live_gps_lon)
-        if (old_live_gps_lat !== live_gps_lat || old_live_gps_lon !== live_gps_lon) {
-            draw_data();
-        }
-        */
     }else{
         console.log(await response.text());
     }
