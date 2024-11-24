@@ -32,7 +32,7 @@ def get_live_gps_data():
         gps = list(GPS.find({}, {"_id": 0}))
     else:
         gps = list(GPS.find({"question_gps": True},
-                            {"_id": 0, "gps_name": 1, "location": {"$slice": -1}}))
+                            {"_id": 0, "gps_name": 1, "location": {"$slice": -1}, "gps_id": 0, "question_gps": 0}))
     return jsonify(gps), 200
 
 @app.route("/login", methods=["POST"])
