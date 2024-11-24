@@ -545,6 +545,8 @@ async function ask_for_live_gps(){
         if (old_live_gps_lat !== live_gps_lat || old_live_gps_lon !== live_gps_lon) {
             draw_data();
         }
+    }else{
+        console.log(await response.text());
     }
     setTimeout(ask_for_live_gps, 3000);
 }
