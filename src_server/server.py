@@ -30,7 +30,6 @@ def get_live_gps_data():
     last_position = my_gps["location"][-1]
     return jsonify(last_position)
 
-
 @app.route('/login', methods=['POST'])
 def post_login():
     content = request.json
@@ -48,9 +47,8 @@ def post_login():
 
 @app.route("/qa", methods=["GET"])
 def get_qa():
-    with open("questions_and_answers.json", "r") as qa_file:
-        qa = json.load(qa_file)
-    return jsonify(qa)
+    questions = QUESTIONS.find()
+    return jsonify(questions)
 
 @app.route('/answer', methods=['POST'])
 def post_answer():
