@@ -383,7 +383,7 @@ function draw_data(){
             ctx.closePath();
             ctx.fillStyle = 'rgb(95,255,0)';
             ctx.fill();
-            ctx.strokeStyle = 'rgb(0,0,0)'; // Colore del bordo del rettangolo
+            ctx.fillStyle = 'rgb(0,0,0)'; // Colore del bordo del rettangolo
             ctx.lineWidth = 2;
             ctx.fillRect(an_x, an_y - textMetrics.actualBoundingBoxAscent, textWidth,
                 textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
