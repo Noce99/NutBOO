@@ -16,7 +16,7 @@ TEAMS = db["teams"]
 QUESTIONS = db["questions"]
 GPS = db["gps"]
 
-@app.route("/live_gps", methods=["GET"])
+@app.route("/live_gps", methods=["POST"])
 def get_live_gps_data():
     gps_id = request.args.get("gps_id", default="", type=str)
     if gps_id == "":
@@ -30,7 +30,7 @@ def get_live_gps_data():
     last_position = my_gps["location"][-1]
     return jsonify(last_position), 200
 
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["POST"])
 def post_login():
     content = request.json
     tried_passcode = content["passcode"]

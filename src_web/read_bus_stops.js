@@ -539,9 +539,9 @@ async function ask_for_live_gps(){
         "gps_id": -1,
     };
     const response = await fetch(`https://${SERVER_IP}:4989/live_gps`, {
-        method: 'GET',
+        method: "POST",
         headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
     });
