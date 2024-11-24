@@ -385,7 +385,7 @@ function draw_data(){
             ctx.fill();
             ctx.strokeStyle = 'rgb(0,0,0)'; // Colore del bordo del rettangolo
             ctx.lineWidth = 2;
-            ctx.strokeRect(an_x, an_y - textMetrics.actualBoundingBoxAscent, textWidth,
+            ctx.fillRect(an_x, an_y - textMetrics.actualBoundingBoxAscent, textWidth,
                 textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
             ctx.fillStyle = 'rgb(209,93,15)';
             ctx.font = "30px Arial";
