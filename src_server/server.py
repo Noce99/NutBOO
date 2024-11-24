@@ -60,7 +60,7 @@ def post_answer():
         {"passcode": tried_passcode},
         {"$push": {"answers": {'question_id': answer_id, 'answer': answer}}}
     )
-
+    return "OK", 200
 
 if __name__ == '__main__':
     live_gps.thread.start()
