@@ -46,15 +46,15 @@ if __name__ == "__main__":
     test_test_question = {
         "question_id": -2,
         "question": "How many l in Marcello?",
-        "answer": "2",
-        "answer_type": "text"
+        "answers": ["2", "4", "10"],
+        "type_of_answer": "text"
     }
 
     test_image_question = {
         "question_id": -1,
         "question": "An amazing picture!",
-        "answer": "NO CORRECT ANSWER TO PICTURES",
-        "answer_type": "image"
+        "answers": ["NO CORRECT ANSWER TO PICTURES"],
+        "type_of_answer": "photo"
     }
 
     questions_collection.insert_one(test_test_question)
