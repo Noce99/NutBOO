@@ -57,8 +57,8 @@ def post_answer():
     answer_id = str(content["answer_id"])
     answer = str(content["answer"])
     TEAMS.update_one(
-        {"passcode": tried_passcode},
-        {"$push": {"answers": {'question_id': answer_id, 'answer': answer}}}
+        {"passcode": tried_passcode, "answers.question_id": answer_id},
+        {"$push": {"answers.$.answer": answer}}
     )
     return "OK", 200
 

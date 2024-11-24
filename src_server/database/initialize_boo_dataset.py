@@ -20,7 +20,8 @@ if __name__ == "__main__":
         "name": "Admin",
         "passcode": "svettavento",
         "admin": True,
-        "answers": [{"question_id": -2, "answer": "10"}, {"question_id": -1, "answer": "/home/enrico/Images/bho.jpg"},],
+        "answers": [{"question_id": "-2", "answer": "10"},
+                    {"question_id": "-1", "answer": "/home/enrico/Images/bho.jpg"},],
     }
 
     test_team = {
@@ -44,14 +45,14 @@ if __name__ == "__main__":
     questions_collection = db["questions"]
 
     test_test_question = {
-        "question_id": -2,
+        "question_id": "-2",
         "question": "How many l in Marcello?",
         "answer": "2",
         "type_of_answer": "text"
     }
 
     test_image_question = {
-        "question_id": -1,
+        "question_id": "-1",
         "question": "An amazing picture!",
         "answer": "NO CORRECT ANSWER TO PICTURES",
         "type_of_answer": "photo"
