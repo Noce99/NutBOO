@@ -374,21 +374,18 @@ function draw_data(){
         // LIVE GPS
         for (let ii=0; ii<gpses_to_print.length; ii++){
             ctx.beginPath();
-            ctx.arc(lon_to_x(parseFloat(gpses_to_print[ii][3])), lat_to_y(parseFloat(gpses_to_print[ii][2])),
-                10, 0, 2 * Math.PI);
+            const an_x = lon_to_x(parseFloat(gpses_to_print[ii][3]));
+            const an_y = lat_to_y(parseFloat(gpses_to_print[ii][2]));
+            ctx.arc(an_x, an_y,10, 0, 2 * Math.PI);
             ctx.closePath();
             ctx.fillStyle = 'rgb(95,255,0)';
             ctx.fill();
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 5;
             ctx.fillStyle = 'rgb(209,93,15)';
             ctx.font = "30px Arial";
-            ctx.strokeText(gpses_to_print[ii][0],
-                lon_to_x(parseFloat(gpses_to_print[ii][3])),
-                lat_to_y(parseFloat(gpses_to_print[ii][2])));
-            ctx.fillText(gpses_to_print[ii][0],
-                lon_to_x(parseFloat(gpses_to_print[ii][3])),
-                lat_to_y(parseFloat(gpses_to_print[ii][2])));
+            ctx.fillText(gpses_to_print[ii][0],an_x,an_y);
+            ctx.fillStyle = 'rgb(0,0,0)';
+            ctx.font = "40px Arial";
+            ctx.fillText(gpses_to_print[ii][0],an_x,an_y);
         }
 
 
