@@ -59,7 +59,7 @@ let map_left, map_top, map_right, map_bottom;
 
 const gps_time_options = {
   year: 'numeric',
-  month: 'long',
+  month: 'numeric',
   day: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
@@ -389,7 +389,7 @@ function draw_data(){
             const date = new Date(gpses_to_print[ii][1] * 1000);
             const formattedDate = new Intl.DateTimeFormat('it-IT', gps_time_options).format(date);
             console.log(formattedDate)
-            const text_to_show = gps_name + " " + formattedDate
+            const text_to_show = gps_name + "\n" + formattedDate
             let textMetrics = ctx.measureText(text_to_show);
             let textWidth = textMetrics.width;
             ctx.arc(an_x, an_y,10, 0, 2 * Math.PI);
@@ -401,7 +401,7 @@ function draw_data(){
             ctx.fillRect(an_x, an_y - textMetrics.actualBoundingBoxAscent, textWidth,
                 textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
             ctx.fillStyle = 'rgb(209,93,15)';
-            ctx.font = "30px Arial";
+            ctx.font = "15px Arial";
             ctx.fillText(text_to_show,an_x,an_y);
         }
 
