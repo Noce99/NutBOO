@@ -73,16 +73,15 @@ if __name__ == "__main__":
 
     question_gps = {
         "question_gps": True,
-        "gps_id": "-1",
-        "location": [{"time": 100, "lat": 44.49632479573085, "lon": 11.321860276019171}],
+        "gps_id": "265885926911886639633859492011259188",
+        "last_location": {"time": 1732573084.0, "lat": 44.49632479573085, "lon": 11.321860276019171},
         "gps_name": "Marci with a Bicycle"
     }
 
     team_gps = {
         "question_gps": False,
         "gps_id": "-2",
-        "location": [{"time": 300, "lat": 44.498222479680344, "lon": 11.34731287754418},
-                     {"time": 400, "lat": 44.49241003439457, "lon": 11.302151213109779}],
+        "last_location": {"time": 1732573084.0, "lat": 44.498222479680344, "lon": 11.34731287754418},
         "gps_name": "Team 1"
     }
 

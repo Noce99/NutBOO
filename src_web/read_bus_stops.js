@@ -33,7 +33,7 @@ let sizes_of_the_map;
 
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM = 0.00008; // 0.001; to see Sasso!
+const MAX_ZOOM = 0.001; // 0.00008; Basic Max!
 let zoom_value = MAX_ZOOM; // deg / px
 const MIN_LON = 11.256635603112843;
 const MAX_LON = 11.365479808365757;
@@ -56,6 +56,15 @@ let bus_stop_radius_q = (MAX_ZOOM*bus_stop_maximum_radius - MIN_ZOOM*bus_stop_mi
 let bus_stop_radius = bus_stop_minimum_radius;
 
 let map_left, map_top, map_right, map_bottom;
+
+const gps_time_options = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+};
 
 gpses_to_print = []
 
@@ -377,7 +386,11 @@ function draw_data(){
             const an_x = lon_to_x(parseFloat(gpses_to_print[ii][3]));
             const an_y = lat_to_y(parseFloat(gpses_to_print[ii][2]));
             const gps_name = gpses_to_print[ii][0];
-            let textMetrics = ctx.measureText(gps_name);
+            const date = new Date(gpses_to_print[ii][1] * 1000);
+            const formattedDate = new Intl.DateTimeFormat('it-IT', gps_time_options).format(date);
+            console.log(formattedDate)
+            const text_to_show = gps_name + " " + formattedDate
+            let textMetrics = ctx.measureText(text_to_show);
             let textWidth = textMetrics.width;
             ctx.arc(an_x, an_y,10, 0, 2 * Math.PI);
             ctx.closePath();
@@ -389,7 +402,7 @@ function draw_data(){
                 textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
             ctx.fillStyle = 'rgb(209,93,15)';
             ctx.font = "30px Arial";
-            ctx.fillText(gps_name,an_x,an_y);
+            ctx.fillText(text_to_show,an_x,an_y);
         }
 
 
@@ -557,12 +570,13 @@ async function ask_for_live_gps(){
     });
     if (response.status === 200) {
         const data = await response.json();
+        console.log(data)
         gpses_to_print.length = 0;
         for (let i = 0; i < data.length; i++) {
             const gps_name = data[i]["gps_name"];
-            const time = data[i]["location"][0]["time"];
-            const lat = data[i]["location"][0]["lat"];
-            const lon = data[i]["location"][0]["lon"];
+            const time = data[i]["last_location"]["time"];
+            const lat = data[i]["last_location"]["lat"];
+            const lon = data[i]["last_location"]["lon"];
             console.log(`${gps_name} -> [${time}, ${lat} N, ${lon} E]`);
             gpses_to_print.push([gps_name, time, lat, lon])
         }

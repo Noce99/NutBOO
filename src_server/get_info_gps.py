@@ -1,5 +1,17 @@
 import socket
 from threading import Thread
+import crcmod
+from datetime import datetime
+import time
+from pymongo import MongoClient
+
+YEAR=2024
+
+socket.setdefaulttimeout(5)
+crc16 = crcmod.mkCrcFun(0x18005, rev=False, initCrc=0xFFFF, xorOut=0x0000)
+client = MongoClient('mongodb://localhost:27017/')
+db = client[f"boo{YEAR}"]
+GPS = db["gps"]
 
 
 class GpsLivelox:
@@ -12,41 +24,21 @@ class GpsLivelox:
         self.server_socket.bind((host, port))
         self.lon = None
         self.lat = None
+        self.time = None
 
         self.thread = Thread(target=self.listen_forever)
 
     def listen_forever(self):
         while True:
             self.server_socket.listen(2)
-            conn, address = self.server_socket.accept()
-            print("Connection from: " + str(address))
-            gps_id = conn.recv(1280)
-            message = '\x01'
-            message = message.encode('utf-8')
-            conn.send(message)
-            data = conn.recv(1280)
+            try:
+                conn, address = self.server_socket.accept()
+            except TimeoutError:
+                continue
+            print("Accepted!")
+            Thread(target=self.deal_with_a_new_connection, args=[conn, address]).start()
+            print("Continuing!")
 
-            preamble = data[:4]
-            data_field_lenght = data[4:8]
-            codec_id = data[8:9]
-            number_of_data = data[9:10]
-            print(preamble)
-            print(data_field_lenght)
-            print(codec_id)
-            print(int.from_bytes(number_of_data, "big"))
-            num_of_data = int.from_bytes(number_of_data, "big")
-            timestamp = int.from_bytes(data[10:18], "big")
-            priority = int.from_bytes(data[18:19])
-            lon = self.coordinate_formater(data.hex()[19:23])
-            lat = self.coordinate_formater(data.hex()[23:25])
-            print(f"{timestamp} {priority} {lon} {lat}")
-            self.lon = self.coordinate_formater(data.hex()[38:46])
-            self.lat = self.coordinate_formater(data.hex()[46:54])
-            print(f"{self.lat} N  {self.lon} E")
-            message = '\x01'
-            message = message.encode('utf-8')
-            conn.send(message)
-            conn.close()
 
     @staticmethod
     def coordinate_formater(hex_coordinate):
@@ -57,3 +49,80 @@ class GpsLivelox:
         else:
             dec_coordinate = coordinate / 10000000
         return dec_coordinate
+
+    @staticmethod
+    def deal_with_a_new_connection(conn, address):
+        print("Connection from: " + str(address))
+
+        # Ask the GPS some data
+        try:
+            gps_id = conn.recv(1280)
+        except TimeoutError:
+            exit()
+
+        imei_length = int.from_bytes(gps_id[:2])
+        imei = int.from_bytes(gps_id[2:2 + imei_length])
+        print(f"GPS ID: {imei} [imei_length={imei_length}, total_message_length={len(gps_id)}]")
+        answer = 1
+        answer = answer.to_bytes(1, 'big')
+        # print(f"{answer}")
+        conn.send(answer)
+
+        # Received Data
+        try:
+            data = conn.recv(2000)
+        except TimeoutError:
+            answer = 0
+            answer = answer.to_bytes(1, 'big')
+            conn.send(answer)
+            exit()
+        # print(len(data))
+
+        preamble = int.from_bytes(data[:4])
+        # print(f"Preamble = {preamble}")
+        data_field_length = int.from_bytes(data[4:8])
+        # print(f"data_field_length = {data_field_length} [should be={len(data)-12}]")
+        codec_id = int.from_bytes(data[8:9])
+        # print(f"codec_id = {codec_id} [should be=142]")
+        number_of_data_1 = int.from_bytes(data[9:10])
+        number_of_data_2 = int.from_bytes(data[-5:-4])
+        # print(f"number_of_data = {number_of_data_1} [should be={number_of_data_2}]")
+        crc = int.from_bytes(data[-4:])
+        # print(f"crc = {crc} [should be={crc16(data[8:-4])}]")
+
+        """
+        READ ALL DATA:
+        if number_of_data_1 != 0:
+            avl_data_length = len(data) - 15
+            per_data_length = avl_data_length // number_of_data_1
+            start = 10
+            for i in range(number_of_data_1):
+                timestamp = int.from_bytes(data[start:start + 8])
+                gps_element = data[start + 9:start + 9 + 15]
+                lon = int.from_bytes(gps_element[:4])
+                lat = int.from_bytes(gps_element[4:8])
+                speed = int.from_bytes(gps_element[-2:])
+                print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
+                start += per_data_length
+        """
+        start = 10
+        timestamp = int.from_bytes(data[start:start + 8])
+        gps_element = data[start + 9:start + 9 + 15]
+        lon = int.from_bytes(gps_element[:4])
+        lat = int.from_bytes(gps_element[4:8])
+        speed = int.from_bytes(gps_element[-2:])
+        print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
+
+        result = GPS.update_one(
+        {"gps_id": str(imei)},
+        {"$set": {"last_location": {"time": timestamp / 1000, "lat": lat / 10000000, "lon": lon / 10000000}}}
+        )
+        if result.modified_count == 0:
+            print(f"Unknown GPS: {imei}")
+        else:
+            print("Pushed GPS data in the dataset!")
+
+        answer = number_of_data_1
+        answer = answer.to_bytes(1, 'big')
+        conn.send(answer)
+        conn.close()
