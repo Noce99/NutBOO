@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 YEAR=2024
 
-socket.setdefaulttimeout(5)
+socket.setdefaulttimeout(15)
 crc16 = crcmod.mkCrcFun(0x18005, rev=False, initCrc=0xFFFF, xorOut=0x0000)
 client = MongoClient('mongodb://localhost:27017/')
 db = client[f"boo{YEAR}"]
@@ -54,75 +54,107 @@ class GpsLivelox:
     def deal_with_a_new_connection(conn, address):
         print("Connection from: " + str(address))
 
-        # Ask the GPS some data
-        try:
-            gps_id = conn.recv(1280)
-        except TimeoutError:
-            exit()
+        while True:
+            # Ask the GPS some data
+            try:
+                gps_id = conn.recv(1280)
+            except TimeoutError:
+                exit()
 
-        imei_length = int.from_bytes(gps_id[:2])
-        imei = int.from_bytes(gps_id[2:2 + imei_length])
-        print(f"GPS ID: {imei} [imei_length={imei_length}, total_message_length={len(gps_id)}]")
-        answer = 1
-        answer = answer.to_bytes(1, 'big')
-        # print(f"{answer}")
-        conn.send(answer)
-
-        # Received Data
-        try:
-            data = conn.recv(2000)
-        except TimeoutError:
-            answer = 0
+            imei_length = int.from_bytes(gps_id[:2])
+            imei = int.from_bytes(gps_id[2:2 + imei_length])
+            print(f"GPS ID: {imei} [imei_length={imei_length}, total_message_length={len(gps_id)}]")
+            answer = 1
             answer = answer.to_bytes(1, 'big')
+            # print(f"{answer}")
             conn.send(answer)
-            exit()
-        # print(len(data))
 
-        preamble = int.from_bytes(data[:4])
-        # print(f"Preamble = {preamble}")
-        data_field_length = int.from_bytes(data[4:8])
-        # print(f"data_field_length = {data_field_length} [should be={len(data)-12}]")
-        codec_id = int.from_bytes(data[8:9])
-        # print(f"codec_id = {codec_id} [should be=142]")
-        number_of_data_1 = int.from_bytes(data[9:10])
-        number_of_data_2 = int.from_bytes(data[-5:-4])
-        # print(f"number_of_data = {number_of_data_1} [should be={number_of_data_2}]")
-        crc = int.from_bytes(data[-4:])
-        # print(f"crc = {crc} [should be={crc16(data[8:-4])}]")
+            while True:
+                # Received Data
+                try:
+                    data = conn.recv(2000)
+                except TimeoutError:
+                    answer = 0
+                    answer = answer.to_bytes(1, 'big')
+                    conn.send(answer)
+                    exit()
+                # print(len(data))
 
-        """
-        READ ALL DATA:
-        if number_of_data_1 != 0:
-            avl_data_length = len(data) - 15
-            per_data_length = avl_data_length // number_of_data_1
-            start = 10
-            for i in range(number_of_data_1):
-                timestamp = int.from_bytes(data[start:start + 8])
-                gps_element = data[start + 9:start + 9 + 15]
-                lon = int.from_bytes(gps_element[:4])
-                lat = int.from_bytes(gps_element[4:8])
-                speed = int.from_bytes(gps_element[-2:])
-                print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
-                start += per_data_length
-        """
-        start = 10
-        timestamp = int.from_bytes(data[start:start + 8])
-        gps_element = data[start + 9:start + 9 + 15]
-        lon = int.from_bytes(gps_element[:4])
-        lat = int.from_bytes(gps_element[4:8])
-        speed = int.from_bytes(gps_element[-2:])
-        print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
+                preamble = int.from_bytes(data[:4])
+                # print(f"Preamble = {preamble}")
+                data_field_length = int.from_bytes(data[4:8])
+                # print(f"data_field_length = {data_field_length} [should be={len(data)-12}]")
+                codec_id = int.from_bytes(data[8:9])
+                # print(f"codec_id = {codec_id} [should be=142]")
+                number_of_data_1 = int.from_bytes(data[9:10])
+                number_of_data_2 = int.from_bytes(data[-5:-4])
+                print(f"number_of_data = {number_of_data_1} [should be={number_of_data_2}]")
+                crc = int.from_bytes(data[-4:])
+                # print(f"crc = {crc} [should be={crc16(data[8:-4])}]")
 
-        result = GPS.update_one(
-        {"gps_id": str(imei)},
-        {"$set": {"last_location": {"time": timestamp / 1000, "lat": lat / 10000000, "lon": lon / 10000000}}}
-        )
-        if result.modified_count == 0:
-            print(f"Unknown GPS: {imei}")
-        else:
-            print("Pushed GPS data in the dataset!")
 
-        answer = number_of_data_1
-        answer = answer.to_bytes(1, 'big')
-        conn.send(answer)
-        conn.close()
+                # READ ALL DATA:
+                if number_of_data_1 != 0:
+                    avl_data_length = len(data) - 15
+                    per_data_length = avl_data_length // number_of_data_1
+                    start = 10
+                    for i in range(number_of_data_1):
+                        timestamp = int.from_bytes(data[start:start + 8])
+                        gps_element = data[start + 9:start + 9 + 15]
+                        lon = int.from_bytes(gps_element[:4])
+                        lat = int.from_bytes(gps_element[4:8])
+                        speed = int.from_bytes(gps_element[-2:])
+                        print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
+                        start += per_data_length
+                        add_ordered_location(imei,
+                                             {"time": timestamp / 1000,
+                                              "lat": lat / 10000000,
+                                              "lon": lon / 10000000}
+                                             )
+
+                    """
+                    READ ONE DATA
+                    start = 10
+                    timestamp = int.from_bytes(data[start:start + 8])
+                    gps_element = data[start + 9:start + 9 + 15]
+                    lon = int.from_bytes(gps_element[:4])
+                    lat = int.from_bytes(gps_element[4:8])
+                    speed = int.from_bytes(gps_element[-2:])
+                    print(f"[{datetime.fromtimestamp(timestamp / 1000)}] [{lon} E; {lat} N] {speed}")
+                    """
+
+                    """
+                    result = GPS.update_one(
+                    {"gps_id": str(imei)},
+                    {"$set": {"last_location": {"time": timestamp / 1000, "lat": lat / 10000000, "lon": lon / 10000000}}}
+                    )
+                    if result.modified_count == 0:
+                        print(f"Unknown GPS: {imei}")
+                    else:
+                        print("Pushed GPS data in the dataset!")
+                    """
+
+                    answer = number_of_data_1
+                    answer = answer.to_bytes(4, 'big')
+                    conn.send(answer)
+                else:
+                    conn.close()
+
+def add_ordered_location(gps_id, new_location):
+    my_document = GPS.find_one({"gps_id": str(gps_id)})
+
+    if not my_document:
+        print(f"Unknown GPS: {gps_id}")
+        return
+
+    my_document["locations"].append(new_location)
+    my_document["locations"].sort(key=lambda x: x["time"])
+
+    result = GPS.update_one(
+        {"gps_id": str(gps_id)},
+        {"$set": {"locations": my_document["locations"]}}
+    )
+    if result.modified_count == 0:
+        print(f"Impossible to get HERE! :-)")
+    else:
+        print("Pushed GPS data in the dataset!")

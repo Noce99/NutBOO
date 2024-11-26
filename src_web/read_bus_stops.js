@@ -70,7 +70,7 @@ gpses_to_print = []
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
-    fetchJSONQA();
+    fetchJSONQuestions();
     const url_parameters = new URLSearchParams(window.location.search);
     let team_name = document.getElementById("team_name");
     team_name.innerHTML = url_parameters.get("team_name")
@@ -258,7 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     questions_panel.addEventListener("pointermove", function(event) {
         if (event.clientX < map_left || event.clientX > map_right || event.clientY < map_top || event.clientY > map_bottom){
-            console.log("Out!")
             mouse_is_pressed = false;
             kinetic_scrolling_speed = 0;
             return;
@@ -273,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         last_y = this_y;
         last_t = this_t;
-        console.log(event.clientX + " " + event.clientY);
     });
 
     questions_panel.addEventListener("pointerup", function(event) {
@@ -301,13 +299,11 @@ function fetchJSONData() {
     );
 }
 
-async function fetchJSONQA() {
-    const response = await fetch("https://" + SERVER_IP + ":4989/qa");
+async function fetchJSONQuestions() {
+    const response = await fetch("https://" + SERVER_IP + ":4989/questions");
     const qa = await response.json();
-    console.log("QA:", qa);
     let divElement = document.getElementById("questions_panel");
     for (let i = 0; i < qa.length; i++) {
-        console.log(qa[i]);
         const newH1 = document.createElement("h1");
         newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
         const newP = document.createElement("p");
@@ -335,12 +331,64 @@ async function fetchJSONQA() {
             newB.classList.add("answer-button");
             newB.onclick = () => {
                 document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
+                setTimeout(upload_file, 1000, newI, qa[i]["question_id"])
             };
             newB.innerHTML = "Select an Image";
             divElement.appendChild(newB);
+            const newImg = document.createElement("img");
+            newImg.id = "image_" + qa[i]["question_id"].toString();
+            divElement.appendChild(newImg);
         }
     }
+    setTimeout(fetchJSONAnswers, 1000);
 }
+
+let text_answers_dict = {}
+async function fetchJSONAnswers() {
+    const response = await fetch("https://" + SERVER_IP + ":4989/answers", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"passcode": passcode})
+    });
+    if (response.status === 200) {
+        const answers = await response.json();
+        console.log("Answers:", answers);
+        for (let i = 0; i < answers.length; i++) {
+            const id_to_get = "answer_" + answers[i]["question_id"].toString();
+            let input_text = document.getElementById(id_to_get);
+            // input_text.value = answers[i]["answer"][answers[i]["answer"].length-1]
+            text_answers_dict[id_to_get] = answers[i]["answer"][answers[i]["answer"].length-1]
+        }
+        console.log("TEXT ANSWER DICT:")
+        console.log(text_answers_dict)
+
+    }else{
+        console.log(`Error while reading answers! ${response.status}`);
+    }
+    // TODO: automatize the following
+    const answers_ids = ["-1"]
+    for (let i=0;i<answers_ids.length;i++) {
+        const photo_response = await fetch("https://" + SERVER_IP + ":4989/photo_answers", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({"passcode": passcode, "question_id": answers_ids[i]})
+        });
+        const an_image = await photo_response.blob()
+        if (response.status === 200) {
+            const url = window.URL.createObjectURL(an_image);
+            const id_to_get = "image_" + answers_ids[i];
+            document.getElementById(id_to_get).src = url;
+        } else {
+            console.log(`Error while reading photo answers! ${response.status}`);
+        }
+    }
+
+}
+
 
 function lon_to_x(lon) {
     return (lon - pointing_lon) / zoom_value + canvas.width / 2;
@@ -388,8 +436,8 @@ function draw_data(){
             const gps_name = gpses_to_print[ii][0];
             const date = new Date(gpses_to_print[ii][1] * 1000);
             const formattedDate = new Intl.DateTimeFormat('it-IT', gps_time_options).format(date);
-            console.log(formattedDate)
             const text_to_show = gps_name + "\n" + formattedDate
+            ctx.font = "15px Arial";
             let textMetrics = ctx.measureText(text_to_show);
             let textWidth = textMetrics.width;
             ctx.arc(an_x, an_y,10, 0, 2 * Math.PI);
@@ -444,6 +492,12 @@ function map_questions_switch(){
         let question_map = document.getElementById("question_map");
         question_map.innerHTML = "Mappa"
         questions_panel.style.visibility = "visible"
+
+
+        for (let key in text_answers_dict) {
+            let input_text = document.getElementById(key);
+            input_text.value = text_answers_dict[key]
+        }
     }else{
         maps_is_visible = true;
         canvas.style.visibility = "visible";
@@ -570,7 +624,6 @@ async function ask_for_live_gps(){
     });
     if (response.status === 200) {
         const data = await response.json();
-        console.log(data)
         gpses_to_print.length = 0;
         for (let i = 0; i < data.length; i++) {
             const gps_name = data[i]["gps_name"];
@@ -595,4 +648,27 @@ function send_answer(passcode, answer_id, answer){
         },
         body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer})
     });
+}
+
+function upload_file(newI, question_id){
+    let file = newI.files[0];
+    if (!file){
+        setTimeout(upload_file, 1000, newI, question_id)
+    }else {
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('question_id', question_id);
+        formData.append('passcode', passcode);
+        fetch("https://" + SERVER_IP + ":4989/photo_upload", {
+            method: 'POST',
+            body: formData,
+        }).then(response => {
+            if (response.ok) {
+                alert("Success!");
+            } else {
+                alert("Error uploading photo!");
+            }
+        }).catch(error => console.error('Error:', error));
+        fetchJSONAnswers();
+    }
 }
