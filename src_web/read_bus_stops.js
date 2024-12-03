@@ -23,8 +23,6 @@ let ctx;
 let data;
 let loaded_data = false;
 
-let qa; // questions and answers
-
 let height_in_km;
 let width_in_km;
 
@@ -33,7 +31,7 @@ let sizes_of_the_map;
 
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM = 0.001; // 0.00008; Basic Max!
+const MAX_ZOOM =  0.00008; // 0.001; // To see Sasso
 let zoom_value = MAX_ZOOM; // deg / px
 const MIN_LON = 11.256635603112843;
 const MAX_LON = 11.365479808365757;
@@ -189,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (pointers.length === 2) {
-            // Calcola la distanza attuale e confrontala con quella iniziale
             const currentDistance = getDistance(pointers[0], pointers[1]);
             const scaleChange = currentDistance / initialDistance;
             zoom_value /= scaleChange;
@@ -299,6 +296,9 @@ function fetchJSONData() {
     );
 }
 
+let answer_to_send = {}
+
+
 async function fetchJSONQuestions() {
     const response = await fetch("https://" + SERVER_IP + ":4989/questions");
     const qa = await response.json();
@@ -317,7 +317,9 @@ async function fetchJSONQuestions() {
             newI.classList.add("answer");
             newI.id = "answer_" + qa[i]["question_id"].toString();
             newI.addEventListener("input", function() {
-                send_answer(passcode, qa[i]["question_id"], newI.value);
+                const now = Date.now()
+                answer_to_send[qa[i]["question_id"]] = now
+                setTimeout(send_answer, 1000, passcode, qa[i]["question_id"], newI.value, now);
             });
 
             divElement.appendChild(newI);
@@ -326,13 +328,16 @@ async function fetchJSONQuestions() {
             newI.type = "file";
             newI.classList.add("answer_file");
             newI.id = "answer_" + qa[i]["question_id"].toString();
+            newI.addEventListener("change", function (event) {
+                upload_file(newI, qa[i]["question_id"]);
+            });
             divElement.appendChild(newI);
             const newB = document.createElement("button");
             newB.classList.add("answer-button");
             newB.onclick = () => {
                 document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
-                setTimeout(upload_file, 1000, newI, qa[i]["question_id"])
             };
+
             newB.innerHTML = "Select an Image";
             divElement.appendChild(newB);
             const newImg = document.createElement("img");
@@ -343,7 +348,6 @@ async function fetchJSONQuestions() {
     setTimeout(fetchJSONAnswers, 1000);
 }
 
-let text_answers_dict = {}
 async function fetchJSONAnswers() {
     const response = await fetch("https://" + SERVER_IP + ":4989/answers", {
         method: "POST",
@@ -358,11 +362,12 @@ async function fetchJSONAnswers() {
         for (let i = 0; i < answers.length; i++) {
             const id_to_get = "answer_" + answers[i]["question_id"].toString();
             let input_text = document.getElementById(id_to_get);
-            // input_text.value = answers[i]["answer"][answers[i]["answer"].length-1]
-            text_answers_dict[id_to_get] = answers[i]["answer"][answers[i]["answer"].length-1]
+            try {
+                input_text.value = answers[i]["answer"][answers[i]["answer"].length-1]
+            } catch (error) {
+              console.error(error);
+            }
         }
-        console.log("TEXT ANSWER DICT:")
-        console.log(text_answers_dict)
 
     }else{
         console.log(`Error while reading answers! ${response.status}`);
@@ -485,7 +490,6 @@ function map_questions_switch(){
     if (maps_is_visible) {
         maps_is_visible = false;
         canvas.style.visibility = "hidden";
-
         selected_bus_stop_name.style.visibility = "hidden"
         sizes_of_the_map.style.visibility = "hidden"
 
@@ -493,11 +497,7 @@ function map_questions_switch(){
         question_map.innerHTML = "Mappa"
         questions_panel.style.visibility = "visible"
 
-
-        for (let key in text_answers_dict) {
-            let input_text = document.getElementById(key);
-            input_text.value = text_answers_dict[key]
-        }
+        fetchJSONAnswers();
     }else{
         maps_is_visible = true;
         canvas.style.visibility = "visible";
@@ -640,35 +640,33 @@ async function ask_for_live_gps(){
     setTimeout(ask_for_live_gps, 3000);
 }
 
-function send_answer(passcode, answer_id, answer){
-    fetch("https://" + SERVER_IP + ":4989/answer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer})
-    });
+function send_answer(passcode, answer_id, answer, when_was_launched){
+    if (when_was_launched === answer_to_send[answer_id] ) {
+        fetch("https://" + SERVER_IP + ":4989/answer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer})
+        });
+    }
 }
 
-function upload_file(newI, question_id){
+async function upload_file(newI, question_id){
     let file = newI.files[0];
-    if (!file){
-        setTimeout(upload_file, 1000, newI, question_id)
-    }else {
-        const formData = new FormData();
-        formData.append('photo', file);
-        formData.append('question_id', question_id);
-        formData.append('passcode', passcode);
-        fetch("https://" + SERVER_IP + ":4989/photo_upload", {
-            method: 'POST',
-            body: formData,
-        }).then(response => {
-            if (response.ok) {
-                alert("Success!");
-            } else {
-                alert("Error uploading photo!");
-            }
-        }).catch(error => console.error('Error:', error));
-        fetchJSONAnswers();
-    }
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('question_id', question_id);
+    formData.append('passcode', passcode);
+    await fetch("https://" + SERVER_IP + ":4989/photo_upload", {
+        method: 'POST',
+        body: formData,
+    }).then(response => {
+        if (response.ok) {
+            alert("Success!");
+        } else {
+            alert("Error uploading photo!");
+        }
+    }).catch(error => console.error('Error:', error));
+    fetchJSONAnswers();
 }
