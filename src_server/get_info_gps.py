@@ -68,24 +68,32 @@ class GpsLivelox:
             answer = answer.to_bytes(1, 'big')
             # print(f"{answer}")
             conn.send(answer)
+            print("Asked data!")
 
             while True:
                 # Received Data
                 try:
                     data = conn.recv(2000)
+                    if len(data) == 0:
+                        print("No data!")
+                        conn.close()
+                        exit()
+                    print(len(data))
                 except TimeoutError:
-                    answer = 0
-                    answer = answer.to_bytes(1, 'big')
-                    conn.send(answer)
+                    print("Connection timed out!")
+                    conn.close()
+                    # answer = 0
+                    # answer = answer.to_bytes(1, 'big')
+                    # conn.send(answer)
                     exit()
                 # print(len(data))
 
                 preamble = int.from_bytes(data[:4])
-                # print(f"Preamble = {preamble}")
+                print(f"Preamble = {preamble}")
                 data_field_length = int.from_bytes(data[4:8])
-                # print(f"data_field_length = {data_field_length} [should be={len(data)-12}]")
+                print(f"data_field_length = {data_field_length} [should be={len(data)-12}]")
                 codec_id = int.from_bytes(data[8:9])
-                # print(f"codec_id = {codec_id} [should be=142]")
+                print(f"codec_id = {codec_id} [should be=142]")
                 number_of_data_1 = int.from_bytes(data[9:10])
                 number_of_data_2 = int.from_bytes(data[-5:-4])
                 print(f"number_of_data = {number_of_data_1} [should be={number_of_data_2}]")
