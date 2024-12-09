@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from boo2024_initialization import BOO2024_INITIALIZATION
 # sudo systemctl start mongod.service
 
 YEAR = "2024"
@@ -31,8 +32,16 @@ if __name__ == "__main__":
         "answers": []
     }
 
+    exploration_team = {
+        "name": "Exploration Team",
+        "passcode": "test",
+        "admin": False,
+        "answers": []
+    }
+
     teams_collection.insert_one(admin)
     teams_collection.insert_one(test_team)
+    teams_collection.insert_one(exploration_team)
 
     # PRINT TEAMS
     documents = teams_collection.find()
@@ -46,20 +55,23 @@ if __name__ == "__main__":
 
     test_test_question = {
         "question_id": "-2",
-        "question": "How many l in Marcello?",
+        "question": "Qui puoi rispondere ad una domanda di prova: Quante \"l\" ci sono in Marcello?",
         "answer": "2",
         "type_of_answer": "text"
     }
 
     test_image_question = {
         "question_id": "-1",
-        "question": "An amazing picture!",
+        "question": "Qui puoi provare a caricare una foto!",
         "answer": "NO CORRECT ANSWER TO PICTURES",
         "type_of_answer": "photo"
     }
 
     questions_collection.insert_one(test_test_question)
     questions_collection.insert_one(test_image_question)
+
+    for el in BOO2024_INITIALIZATION:
+        questions_collection.insert_one(el)
 
     # PRINT QUESTIONS
     documents = questions_collection.find()
@@ -73,16 +85,16 @@ if __name__ == "__main__":
 
     question_gps = {
         "question_gps": True,
-        "gps_id": "265885926911886639633859492011259188",
+        "gps_id": "265885926911886639633859492011259188", #L605
         "locations": [{"time": 1732573084.0, "lat": 44.49632479573085, "lon": 11.321860276019171}],
-        "gps_name": "Marci with a Bicycle"
+        "gps_name": "Bonus 1"
     }
 
     team_gps = {
-        "question_gps": False,
-        "gps_id": "-2",
+        "question_gps": True,
+        "gps_id": "265885926911886639633859509275407414", # L257
         "locations": [{"time": 1732573084.0, "lat": 44.498222479680344, "lon": 11.34731287754418}],
-        "gps_name": "Team 1"
+        "gps_name": "Bonus 2"
     }
 
     gps_collection.insert_one(question_gps)

@@ -7,11 +7,13 @@ from get_info_gps import GpsLivelox
 import json
 from pymongo import MongoClient
 import os
+import pathlib
 import cv2
 
 YEAR = 2024
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024 # 16 MB
 CORS(app)
 live_gps = GpsLivelox()
 client = MongoClient('mongodb://localhost:27017/')
@@ -20,6 +22,70 @@ db = client[f"boo{YEAR}"]
 TEAMS = db["teams"]
 QUESTIONS = db["questions"]
 GPS = db["gps"]
+NUTBUS_FOLDER = pathlib.Path(__file__).parent.resolve().parent.resolve()
+
+MAPS = [
+    {
+        "name": "1. Prologo",
+        "name_lat": 44.478,
+        "name_lon": 11.291,
+        "lat": [44.48785, 44.48832, 44.48859, 44.48799, 44.48756],
+        "lon": [11.28835, 11.28849, 11.28945, 11.28968, 11.28941],
+        "r": 255,
+        "g": 0,
+        "b": 0,
+    },
+    {
+        "name": "2. Gauss Green",
+        "name_lat": 44.473,
+        "name_lon": 11.291,
+        "lat": [44.49677, 44.49949, 44.49925, 44.49449],
+        "lon": [11.29900, 11.30400, 11.30473, 11.30307],
+        "r": 255,
+        "g": 127,
+        "b": 0,
+    },
+    {
+        "name": "3. Proiezioni Artistiche",
+        "name_lat": 44.468,
+        "name_lon": 11.291,
+        "lat": [44.51641, 44.51712, 44.51675, 44.51604],
+        "lon": [11.29653, 11.29701, 11.29819, 11.29786],
+        "r": 255,
+        "g": 255,
+        "b": 0,
+    },
+    {
+        "name": "4. Level UP",
+        "name_lat": 44.478,
+        "name_lon": 11.318,
+        "lat": [44.48481, 44.48517, 44.48249, 44.48263],
+        "lon": [11.26796, 11.27155, 11.27154, 11.26948],
+        "r": 0,
+        "g": 255,
+        "b": 0,
+    },
+    {
+        "name": "5. Treno",
+        "name_lat": 44.473,
+        "name_lon": 11.318,
+        "lat": [44.49284, 44.49535, 44.49773, 44.49754, 44.49604, 44.49280],
+        "lon": [11.28362, 11.28461, 11.28638, 11.28665, 11.28540, 11.28395],
+        "r": 0,
+        "g": 127,
+        "b": 0,
+    },
+    {
+        "name": "6. Bologna Arcade",
+        "name_lat": 44.468,
+        "name_lon": 11.318,
+        "lat": [44.49323, 44.49910, 44.49866, 44.49408, 44.49149, 44.49138],
+        "lon": [11.33582, 11.33825, 11.34622, 11.35199, 11.34653, 11.33995],
+        "r": 127,
+        "g": 0,
+        "b": 0,
+    },
+]
 
 @app.route("/live_gps", methods=["POST"])
 def get_live_gps_data():
@@ -32,6 +98,10 @@ def get_live_gps_data():
         return "To many TEAMS whit this passcode! WTF?", 400
 
     my_team = found_teams[0]
+
+    if my_team["name"] == "Exploration Team":
+        return "Not Allow to see this!", 400
+
     admin = my_team["admin"]
     if admin:
         gps = list(GPS.find({},
@@ -60,10 +130,38 @@ def post_login():
         response = {"team": my_team["name"]}
     return jsonify(response)
 
-@app.route("/questions", methods=["GET"])
+@app.route("/questions", methods=["POST"])
 def get_questions():
-    questions = list(QUESTIONS.find({}, {"_id": 0}))
-    return jsonify(questions)
+    content = request.json
+    tried_passcode = str(content["passcode"])
+    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "name": 1}))
+    if len(result) == 0:
+        return "Unknown Team", 400
+    elif len(result) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    else:
+        if result[0]["name"] != "Exploration Team":
+            questions = list(QUESTIONS.find({"question_id": {"$nin": ["-1", "-2"]}}, {"_id": 0}))
+            return jsonify(questions), 200
+        else:
+            questions = list(QUESTIONS.find({"question_id": {"$in": ["-1", "-2"]}}, {"_id": 0}))
+            print("Matching questions: {}".format(questions))
+            return jsonify(questions), 200
+
+@app.route("/maps", methods=["POST"])
+def get_maps():
+    content = request.json
+    tried_passcode = str(content["passcode"])
+    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "name": 1}))
+    if len(result) == 0:
+        return "Unknown Team", 400
+    elif len(result) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    else:
+        if result[0]["name"] != "Exploration Team":
+            return MAPS, 200
+        else:
+            return "Not allow to have this information!", 400
 
 @app.route("/answers", methods=["POST"])
 def get_answers():
@@ -137,9 +235,9 @@ def upload_a_photo():
     c = datetime.now()
     current_time = c.strftime("%H:%M:%S.jpg")
 
-    file_path = os.path.join("../received_photo", current_time)
+    file_path = os.path.join(NUTBUS_FOLDER, "received_photo", current_time)
     file.save(file_path)
-    hd_file_path = os.path.join("../hd_received_photo", current_time)
+    hd_file_path = os.path.join(NUTBUS_FOLDER, "hd_received_photo", current_time)
     shutil.copyfile(file_path, hd_file_path)
     try:
         img = cv2.imread(file_path)
@@ -181,6 +279,6 @@ def upload_a_photo():
 
 if __name__ == '__main__':
     live_gps.thread.start()
-    app.run(host="0.0.0.0", ssl_context=('cert1.pem', 'privkey1.pem'), port=4989)
+    app.run(host="0.0.0.0", port=4999)
 
 

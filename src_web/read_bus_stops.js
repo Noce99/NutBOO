@@ -1,16 +1,18 @@
 // CALIBRATION
-const px_x_1 = 2442;
-const px_y_1 = 1846;
-const px_x_2 = 634;
-const px_y_2 = 2887;
-const lat_1 = 44.493431;
-const lon_1 = 11.308124;
-const lat_2 = 44.479294;
-const lon_2 = 11.271379;
+const px_x_1 = 0;
+const px_y_1 = 0;
+const px_x_2 = 2182;
+const px_y_2 = 1435;
+const lat_1 = 44.5212535;
+const lon_1 = 11.2610802;
+const lat_2 = 44.47755;
+const lon_2 = 11.35404;
 // END CALIBRATION
 
 
 const SERVER_IP = "boo.nutlab.it" //"137.204.57.32"
+const HTTPS = "https://";
+const PORT = "5000";
 
 let passcode;
 
@@ -31,12 +33,13 @@ let sizes_of_the_map;
 
 let selected_bus_stop_i = -1;
 const MIN_ZOOM = 0.00001;
-const MAX_ZOOM =  0.00008; // 0.001; // To see Sasso
+// const MAX_ZOOM =  0.001; // To see Sasso
+const MAX_ZOOM =  0.00015; // Default
 let zoom_value = MAX_ZOOM; // deg / px
-const MIN_LON = 11.256635603112843;
-const MAX_LON = 11.365479808365757;
-const MIN_LAT = 44.47267601010103;
-const MAX_LAT = 44.50946314343433;
+const MIN_LON = 11.2610802;
+const MAX_LON = 11.366352213;
+const MIN_LAT = 44.464637655;
+const MAX_LAT = 44.5212535;
 let pointing_lon = 11.34310;
 let pointing_lat = 44.49375;
 
@@ -48,12 +51,22 @@ let kinetic_scrolling_friction = -0.05;
 let kinetic_scrolling_min_speed = 5.0;
 
 let bus_stop_minimum_radius = 2;
-let bus_stop_maximum_radius = 7;
+let bus_stop_maximum_radius = 5;
 let bus_stop_radius_m = (bus_stop_minimum_radius - bus_stop_maximum_radius) / (MAX_ZOOM - MIN_ZOOM);
 let bus_stop_radius_q = (MAX_ZOOM*bus_stop_maximum_radius - MIN_ZOOM*bus_stop_minimum_radius) / (MAX_ZOOM - MIN_ZOOM);
 let bus_stop_radius = bus_stop_minimum_radius;
 
+let map_names_minimum_size = 13;
+let map_names_maximum_size = 50;
+let map_names_size_m = (map_names_minimum_size - map_names_maximum_size) / (MAX_ZOOM - MIN_ZOOM);
+let map_names_size_q = (MAX_ZOOM*map_names_maximum_size - MIN_ZOOM*map_names_minimum_size) / (MAX_ZOOM - MIN_ZOOM);
+let map_name_size = map_names_minimum_size;
+
 let map_left, map_top, map_right, map_bottom;
+
+let image_questions_id = [];
+
+let MAPS = [];
 
 const gps_time_options = {
   year: 'numeric',
@@ -68,11 +81,11 @@ gpses_to_print = []
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
-    fetchJSONQuestions();
     const url_parameters = new URLSearchParams(window.location.search);
     let team_name = document.getElementById("team_name");
     team_name.innerHTML = url_parameters.get("team_name")
     passcode = url_parameters.get("passcode")
+    fetchJSONQuestions();
 
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
@@ -83,10 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
     selected_bus_stop_name.innerHTML = "Select a Bus Stop (Red Dots)!"
     sizes_of_the_map = document.getElementById("sizes_of_the_map");
 
-    bologna_satellite.src = "./Bologna.jpg";
+    bologna_satellite.src = "./Sfondosfocatissimo_epsg4326.jpg";
     bologna_satellite.onload = function() {
         bologna_satellite_loaded = true;
-        console.log("Loaded Bologna.jpg!")
+        console.log("Loaded Sfondosfocatissimo_epsg4326.jpg!")
         draw_data();
     }
 
@@ -196,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 zoom_value = MAX_ZOOM;
             }
             bus_stop_radius = zoom_value*bus_stop_radius_m + bus_stop_radius_q;
+            map_name_size = zoom_value*map_names_size_m + map_names_size_q;
             initialDistance = currentDistance;
             draw_data();
         }
@@ -236,6 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         bus_stop_radius = zoom_value*bus_stop_radius_m + bus_stop_radius_q;
+        map_name_size = zoom_value*map_names_size_m + map_names_size_q;
         draw_data();
     });
 
@@ -300,56 +315,84 @@ let answer_to_send = {}
 
 
 async function fetchJSONQuestions() {
-    const response = await fetch("https://" + SERVER_IP + ":4989/questions");
-    const qa = await response.json();
-    let divElement = document.getElementById("questions_panel");
-    for (let i = 0; i < qa.length; i++) {
-        const newH1 = document.createElement("h1");
-        newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
-        const newP = document.createElement("p");
-        newP.innerHTML = qa[i]["question"].toString();
-        divElement.appendChild(newH1);
-        divElement.appendChild(newP);
+    const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/questions`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"passcode": passcode})
+    });
+    if (response.status === 200) {
+        const qa = await response.json();
+        let divElement = document.getElementById("questions_panel");
 
-        if (qa[i]["type_of_answer"] === "text") {
-            const newI = document.createElement("input");
-            newI.type = "text";
-            newI.classList.add("answer");
-            newI.id = "answer_" + qa[i]["question_id"].toString();
-            newI.addEventListener("input", function() {
-                const now = Date.now()
-                answer_to_send[qa[i]["question_id"]] = now
-                setTimeout(send_answer, 1000, passcode, qa[i]["question_id"], newI.value, now);
-            });
+        image_questions_id.length = 0;
+        for (let i = 0; i < qa.length; i++) {
+            const newH1 = document.createElement("h1");
+            newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
+            const newP = document.createElement("p");
+            newP.innerHTML = qa[i]["question"].toString();
+            divElement.appendChild(newH1);
+            divElement.appendChild(newP);
 
-            divElement.appendChild(newI);
-        } else {
-            const newI = document.createElement("input");
-            newI.type = "file";
-            newI.classList.add("answer_file");
-            newI.id = "answer_" + qa[i]["question_id"].toString();
-            newI.addEventListener("change", function (event) {
-                upload_file(newI, qa[i]["question_id"]);
-            });
-            divElement.appendChild(newI);
-            const newB = document.createElement("button");
-            newB.classList.add("answer-button");
-            newB.onclick = () => {
-                document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
-            };
+            if (qa[i]["type_of_answer"] === "text") {
+                const newI = document.createElement("input");
+                newI.type = "text";
+                newI.classList.add("answer");
+                newI.id = "answer_" + qa[i]["question_id"].toString();
+                newI.addEventListener("input", function () {
+                    const now = Date.now()
+                    answer_to_send[qa[i]["question_id"]] = now
+                    setTimeout(send_answer, 1000, passcode, qa[i]["question_id"], newI.value, now);
+                });
 
-            newB.innerHTML = "Select an Image";
-            divElement.appendChild(newB);
-            const newImg = document.createElement("img");
-            newImg.id = "image_" + qa[i]["question_id"].toString();
-            divElement.appendChild(newImg);
+                divElement.appendChild(newI);
+            } else {
+                image_questions_id.push(qa[i]["question_id"].toString());
+                const newI = document.createElement("input");
+                newI.type = "file";
+                newI.classList.add("answer_file");
+                newI.id = "answer_" + qa[i]["question_id"].toString();
+                newI.addEventListener("change", function (event) {
+                    upload_file(newI, qa[i]["question_id"]);
+                });
+                divElement.appendChild(newI);
+                const newB = document.createElement("button");
+                newB.classList.add("answer-button");
+                newB.onclick = () => {
+                    document.getElementById("answer_" + qa[i]["question_id"].toString()).click();
+                };
+
+                newB.innerHTML = "Select an Image";
+                divElement.appendChild(newB);
+                const newImg = document.createElement("img");
+                newImg.id = "image_" + qa[i]["question_id"].toString();
+                divElement.appendChild(newImg);
+            }
         }
+    }else{
+        const qa = await response;
+        console.log(qa)
+    }
+    const map_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/maps`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"passcode": passcode})
+    });
+    if (map_response.status === 200) {
+        console.log("MAPS:")
+        MAPS = await map_response.json();
+        console.log(MAPS)
+    }else{
+        console.log(await map_response.json())
     }
     setTimeout(fetchJSONAnswers, 1000);
 }
 
 async function fetchJSONAnswers() {
-    const response = await fetch("https://" + SERVER_IP + ":4989/answers", {
+    const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/answers`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -360,32 +403,28 @@ async function fetchJSONAnswers() {
         const answers = await response.json();
         console.log("Answers:", answers);
         for (let i = 0; i < answers.length; i++) {
-            const id_to_get = "answer_" + answers[i]["question_id"].toString();
-            let input_text = document.getElementById(id_to_get);
-            try {
-                input_text.value = answers[i]["answer"][answers[i]["answer"].length-1]
-            } catch (error) {
-              console.error(error);
+            if (! image_questions_id.includes(answers[i]["question_id"].toString())){
+                const id_to_get = "answer_" + answers[i]["question_id"].toString();
+                let input_text = document.getElementById(id_to_get);
+                input_text.value = answers[i]["answer"][answers[i]["answer"].length - 1]
             }
         }
-
     }else{
         console.log(`Error while reading answers! ${response.status}`);
     }
-    // TODO: automatize the following
-    const answers_ids = ["-1"]
-    for (let i=0;i<answers_ids.length;i++) {
-        const photo_response = await fetch("https://" + SERVER_IP + ":4989/photo_answers", {
+    console.log(`image_questions_id.length = ${image_questions_id.length}`)
+    for (let i=0;i<image_questions_id.length;i++) {
+        const photo_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/photo_answers`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"passcode": passcode, "question_id": answers_ids[i]})
+            body: JSON.stringify({"passcode": passcode, "question_id": image_questions_id[i]})
         });
         const an_image = await photo_response.blob()
         if (response.status === 200) {
             const url = window.URL.createObjectURL(an_image);
-            const id_to_get = "image_" + answers_ids[i];
+            const id_to_get = "image_" + image_questions_id[i];
             document.getElementById(id_to_get).src = url;
         } else {
             console.log(`Error while reading photo answers! ${response.status}`);
@@ -433,6 +472,25 @@ function draw_data(){
             ctx.fillStyle = color;
             ctx.fill();
         }
+
+        // LET'S DRAW MAPS AREAS
+        for (let i=0; i < MAPS.length; i++) {
+            ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 0.5)`;
+            ctx.beginPath();
+            for (let ii = 0; ii < MAPS[i]["lat"].length; ii++) {
+                if (ii === 0) {
+                    ctx.moveTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
+                } else {
+                    ctx.lineTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.font = `${map_name_size}px Arial`;
+            ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 1.0)`;
+            ctx.fillText(MAPS[i]["name"], lon_to_x(MAPS[i]["name_lon"]), lat_to_y(MAPS[i]["name_lat"]));
+
+        }
         // LIVE GPS
         for (let ii=0; ii<gpses_to_print.length; ii++){
             ctx.beginPath();
@@ -441,7 +499,12 @@ function draw_data(){
             const gps_name = gpses_to_print[ii][0];
             const date = new Date(gpses_to_print[ii][1] * 1000);
             const formattedDate = new Intl.DateTimeFormat('it-IT', gps_time_options).format(date);
-            const text_to_show = gps_name + "\n" + formattedDate
+            let text_to_show;
+            if (zoom_value < (MAX_ZOOM+MIN_ZOOM)/2) {
+                text_to_show = gps_name + formattedDate
+            }else{
+                text_to_show = gps_name
+            }
             ctx.font = "15px Arial";
             let textMetrics = ctx.measureText(text_to_show);
             let textWidth = textMetrics.width;
@@ -615,7 +678,7 @@ function scroll_kinetic(){
 }
 
 async function ask_for_live_gps(){
-    const response = await fetch(`https://${SERVER_IP}:4989/live_gps`, {
+    const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/live_gps`, {
         method: "POST",
         headers: {
         "Content-Type": "application/json"
@@ -642,7 +705,7 @@ async function ask_for_live_gps(){
 
 function send_answer(passcode, answer_id, answer, when_was_launched){
     if (when_was_launched === answer_to_send[answer_id] ) {
-        fetch("https://" + SERVER_IP + ":4989/answer", {
+        fetch(`${HTTPS}${SERVER_IP}:${PORT}/answer`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -658,7 +721,7 @@ async function upload_file(newI, question_id){
     formData.append('photo', file);
     formData.append('question_id', question_id);
     formData.append('passcode', passcode);
-    await fetch("https://" + SERVER_IP + ":4989/photo_upload", {
+    await fetch(`${HTTPS}${SERVER_IP}:${PORT}/photo_upload`, {
         method: 'POST',
         body: formData,
     }).then(response => {
