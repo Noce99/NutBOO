@@ -193,7 +193,7 @@ BOO2024_INITIALIZATION = [
     },
     {
         "question_id": "33",
-        "question": "Scritta sullo sticker del pollo più cool del vicinato",
+        "question": "Scritta sullo sticker del pollo",
         "answer": "Polleggio",
         "type_of_answer": "text"
     },
@@ -350,7 +350,7 @@ BOO2024_INITIALIZATION = [
     {
         "question_id": "59",
         "question": "Quante farfalle sono già completamente uscite dal cestino del rusco?",
-        "answer": "29",
+        "answer": "30",
         "type_of_answer": "text"
     },
 ]
