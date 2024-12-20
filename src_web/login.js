@@ -23,7 +23,7 @@ async function login() {
         const encode_team_name = encodeURIComponent(team_name);
         window.location.href = `show_bus_stops.html?passcode=${encoded_passcode}&team_name=${encode_team_name}`;
     } else {
-        input.value = "This passcode doesn't exists! Please try again!";
+        input.value = "Sbagliato! :-(";
     }
 }
  

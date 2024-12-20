@@ -29,11 +29,13 @@ MAPS = [
         "name": "1. Filanda",
         "name_lat": 44.478,
         "name_lon": 11.291,
-        "lat": [44.48785, 44.48832, 44.48859, 44.48799, 44.48756],
-        "lon": [11.28835, 11.28849, 11.28945, 11.28968, 11.28941],
+        "lat": [44.48777422342615, 44.48923208560633, 44.48605058735159, 44.4858650669724],
+        "lon": [11.284407134833604, 11.28966438485307, 11.288740827324974, 11.284818594592538],
         "r": 255,
         "g": 0,
         "b": 0,
+        "number_lat": 44.489061907114895,
+        "number_lon": 11.28580697645596
     },
     {
         "name": "2. Gauss Green",
@@ -44,6 +46,8 @@ MAPS = [
         "r": 255,
         "g": 127,
         "b": 0,
+        "number_lat": 44.49741576308542,
+        "number_lon": 11.30488904579108
     },
     {
         "name": "3. Proiezioni Artistiche",
@@ -54,6 +58,8 @@ MAPS = [
         "r": 255,
         "g": 255,
         "b": 0,
+        "number_lat": 44.51719407537002,
+        "number_lon": 11.297770286988072
     },
     {
         "name": "4. Level UP",
@@ -64,6 +70,8 @@ MAPS = [
         "r": 0,
         "g": 255,
         "b": 0,
+        "number_lat": 44.487312767071316,
+        "number_lon": 11.269650358206675
     },
     {
         "name": "5. Barcaiuole",
@@ -74,6 +82,8 @@ MAPS = [
         "r": 0,
         "g": 127,
         "b": 0,
+        "number_lat": 44.496420283590886,
+        "number_lon": 11.282470524318997
     },
     {
         "name": "6. Bologna Arcade",
@@ -84,7 +94,12 @@ MAPS = [
         "r": 127,
         "g": 0,
         "b": 0,
+        "number_lat": 44.49928782703274,
+        "number_lon": 11.342864778050512
     },
+    {
+        "name": "BONUS",
+    }
 ]
 
 @app.route("/live_gps", methods=["POST"])
@@ -185,20 +200,23 @@ def get_answers():
 def get_image():
     content = request.json
     tried_passcode = str(content["passcode"])
-    question_id = content["question_id"]
-    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "answers": 1}))
+    asked_team_name = str(content["team_name"])
+    question_id = str(content["question_id"])
+    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "answers": 1, "admin": 1}))
     if len(result) == 0:
         response = {"team": "Unknown"}
         print("team unknown!")
     elif len(result) > 1:
         return "To many TEAMS whit this passcode! WTF?", 400
     else:
-        response = result[0]["answers"]
+        if result[0]["admin"]:
+            response = list(TEAMS.find({"name": asked_team_name}, {"_id": 0, "answers": 1}))[0]["answers"]
+        else:
+            response = result[0]["answers"]
     for resp in response:
         if resp["question_id"] == str(question_id):
             return send_file(resp["answer"][-1], mimetype='image/jpeg')
     return "Answer not found", 205
-
     # return send_file(file_path, mimetype='image/jpeg')
 
 
@@ -208,10 +226,23 @@ def post_answer():
     tried_passcode = str(content["passcode"])
     answer_id = str(content["answer_id"])
     answer = str(content["answer"])
-    result = TEAMS.update_one(
-        {"passcode": tried_passcode, "answers.question_id": answer_id},
-        {"$push": {"answers.$.answer": answer}}
-    )
+    team_name = str(content["team_name"])
+    found_teams = list(TEAMS.find({"passcode": tried_passcode}))
+    if len(found_teams) == 0:
+        return "Unknown passcode", 400
+    if len(found_teams) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    my_team = found_teams[0]
+    if (my_team["admin"]):
+        result = TEAMS.update_one(
+            {"name": team_name, "answers.question_id": answer_id},
+            {"$push": {"answers.$.answer": answer}}
+        )
+    else:
+        result = TEAMS.update_one(
+            {"name": team_name, "passcode": tried_passcode, "answers.question_id": answer_id},
+            {"$push": {"answers.$.answer": answer}}
+        )
     if result.modified_count == 0:
         found_questions = list(QUESTIONS.find(
             {"question_id": answer_id}
@@ -219,10 +250,16 @@ def post_answer():
         if len(found_questions) > 1:
             print(f"WTF! More than one question with same id: {answer_id}!")
         elif len(found_questions) == 1:
-            TEAMS.update_one(
-                {"passcode": tried_passcode},
-                {"$push": {"answers": {"question_id": answer_id, "answer": [answer]}}}
-            )
+            if (my_team["admin"]):
+                TEAMS.update_one(
+                    {"name": team_name},
+                    {"$push": {"answers": {"question_id": answer_id, "answer": [answer]}}}
+                )
+            else:
+                TEAMS.update_one(
+                    {"passcode": tried_passcode},
+                    {"$push": {"answers": {"question_id": answer_id, "answer": [answer]}}}
+                )
     return "OK", 200
 
 
@@ -293,8 +330,45 @@ def get_teams_name():
     admin = my_team["admin"]
     if admin:
         all_teams_name = list(TEAMS.find({"admin": False}, {"name": 1, "_id": 0}))
-        names = [team["name"] for team in all_teams_name if team["name"] != "Exploration Team"]
+        names = [team["name"] for team in all_teams_name if team["name"] != "Test"]
         return jsonify(names), 200
+    else:
+        return "Not Allow!", 400
+
+@app.route('/correct_team', methods=['POST'])
+def get_correct_team():
+    content = request.json
+    tried_passcode = str(content["passcode"])
+    found_teams = list(TEAMS.find({"passcode": tried_passcode}))
+    tried_team_name = str(content["team_name"])
+    found_team_names = list(TEAMS.find({"name": tried_team_name}))
+    if len(found_teams) == 0:
+        return "Unknown passcode", 400
+    if len(found_teams) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    my_team = found_teams[0]
+    admin = my_team["admin"]
+    if admin:
+        if len(found_team_names) == 0:
+            return "Unknown team name!", 400
+        if len(found_team_names) > 1:
+            return "To many TEAMS whit this name! WTF?", 400
+        selected_team = found_team_names[0]
+        team_answers = {el["question_id"]:el["answer"][-1] for el in selected_team["answers"]}
+        found_questions = list(QUESTIONS.find({"question_id": {"$nin": ["-1", "-2"]}}, {"_id": 0}))
+        dict_found_questions = {}
+        for el in found_questions:
+            if el["type_of_answer"] == "text":
+                dict_found_questions[el["question_id"]] = el["answer"]
+        result = {}
+        for question_id in dict_found_questions:
+            if team_answers[question_id] == "":
+                result[question_id] = None
+            elif team_answers[question_id].lower() == dict_found_questions[question_id].lower():
+                result[question_id] = True
+            else:
+                result[question_id] = False
+        return jsonify(result), 200
     else:
         return "Not Allow!", 400
 

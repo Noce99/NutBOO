@@ -139,3 +139,32 @@ input {
     box-sizing: border-box;
     font-size: 3vh;
 }
+
+.map_selector{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 3vh;
+    border: 2px solid #007BFF; /* Bordo di 2px con colore blu */
+    padding: 10px 20px;        /* Spaziatura interna del bottone */
+    margin: 10px 0;            /* Spaziatura esterna sopra e sotto */
+    border-radius: 5px;        /* Bordo arrotondato */
+    background-color: #ffffff; /* Sfondo bianco */
+    color: #007BFF;            /* Testo blu */
+    cursor: pointer;
+}
+
+.correct_answer{
+    font-size: 3vh;
+    color: #3A7734;
+    font-weight: bold;
+}
+
+.wrong_answer{
+    font-size: 20vh;
+    color: #f10c0c;
+    font-weight: bold;
+}

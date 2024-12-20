@@ -78,6 +78,8 @@ let image_questions_id = [];
 
 let MAPS = [];
 
+let all_collapsibleContent = []
+let all_map_buttons = []
 
 const gps_time_options = {
   year: 'numeric',
@@ -92,6 +94,10 @@ gpses_to_print = []
 
 let selected_stop_is_a_train = false;
 let selected_team;
+
+let tot_wrong = 0;
+let tot_correct = 0;
+let tot_not_answered = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
@@ -376,10 +382,23 @@ async function admin_Setup(){
             newSelect.addEventListener("change", function(event) {
               selected_team = event.target.value;
               fetchJSONAnswers();
+
             });
         }
         selected_team = newSelect.value;
         divElement.appendChild(newSelect);
+        const correct_H1 = document.createElement("h1");
+        correct_H1.innerHTML = "Loading...";
+        correct_H1.id = "counter_correct_h1"
+        divElement.appendChild(correct_H1);
+        const wrong_H1 = document.createElement("h1");
+        wrong_H1.innerHTML = "Loading...";
+        wrong_H1.id = "counter_wrong_h1"
+        divElement.appendChild(wrong_H1);
+        const unset_H1 = document.createElement("h1");
+        unset_H1.innerHTML = "Loading...";
+        unset_H1.id = "counter_unset_h1"
+        divElement.appendChild(unset_H1);
         fetchJSONQuestions();
     }
 }
@@ -398,14 +417,79 @@ async function fetchJSONQuestions() {
         const qa = await response.json();
         let divElement = document.getElementById("questions_panel");
 
+        if (team_name !== "Test") {
+            const map_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/maps`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({"passcode": passcode})
+            });
+            if (map_response.status === 200) {
+                console.log("MAPS:")
+                MAPS = await map_response.json();
+                console.log(MAPS)
+            } else {
+                console.log(await map_response.json())
+            }
+        }
+
         image_questions_id.length = 0;
+        if (MAPS.length === 0){
+            const headContent = document.createElement('div');
+            divElement.appendChild(headContent);
+            all_collapsibleContent.push(headContent);
+        }else {
+            for (let i = 0; i < MAPS.length; i++) {
+                const button = document.createElement('button');
+                if (MAPS.length === 0) {
+                    button.textContent = "Test Map!";
+                } else {
+                    button.textContent = `${MAPS[i].name}`;
+                }
+                button.style.cursor = 'pointer';
+                button.className = "map_selector"
+                const collapsibleContent = document.createElement('div');
+                collapsibleContent.className = 'collapsible-content';
+                if (MAPS.length !== 0) {
+                    collapsibleContent.style.display = 'none';
+                } else {
+                    collapsibleContent.style.display = 'block';
+                }
+                button.addEventListener('click', () => {
+                    for (let ii=0; ii<all_collapsibleContent.length; ii++) {
+                        if (ii === i) {
+                            all_collapsibleContent[ii].style.display = 'block';
+                            all_map_buttons[ii].style.color = `rgb(255, 0, 123)`;
+                            all_map_buttons[ii].style.borderColor = `rgb(255, 0, 123)`;
+                        }else{
+                            all_collapsibleContent[ii].style.display = 'none';
+                            all_map_buttons[ii].style.color = `rgb(0, 123, 255)`;
+                            all_map_buttons[ii].style.borderColor = `rgb(0, 123, 255)`;
+                        }
+                    }
+                });
+                divElement.appendChild(button);
+                all_collapsibleContent.push(collapsibleContent);
+                all_map_buttons.push(button);
+            }
+            for (let i=0; i<all_collapsibleContent.length; i++){
+                divElement.appendChild(all_collapsibleContent[i]);
+            }
+        }
         for (let i = 0; i < qa.length; i++) {
+            let content_map;
+            if (MAPS.length === 0){
+                content_map = all_collapsibleContent[0];
+            }else {
+                content_map = all_collapsibleContent[Math.floor((i+1) / 10)];
+            }
             const newH1 = document.createElement("h1");
             newH1.innerHTML = "Domanda " + qa[i]["question_id"].toString() + ":";
             const newP = document.createElement("p");
             newP.innerHTML = qa[i]["question"].toString();
-            divElement.appendChild(newH1);
-            divElement.appendChild(newP);
+            content_map.appendChild(newH1);
+            content_map.appendChild(newP);
 
             if (qa[i]["type_of_answer"] === "text") {
                 const newI = document.createElement("input");
@@ -418,7 +502,13 @@ async function fetchJSONQuestions() {
                     setTimeout(send_answer, 1000, passcode, qa[i]["question_id"], newI.value, now);
                 });
 
-                divElement.appendChild(newI);
+                content_map.appendChild(newI);
+                if (team_name === "Admin"){
+                    const newP = document.createElement("p");
+                    newP.classList.add("correct_answer");
+                    newP.id = "correction_" + qa[i]["question_id"].toString();
+                    content_map.appendChild(newP);
+                }
             } else {
                 image_questions_id.push(qa[i]["question_id"].toString());
                 const newI = document.createElement("input");
@@ -428,7 +518,7 @@ async function fetchJSONQuestions() {
                 newI.addEventListener("change", function (event) {
                     upload_file(newI, qa[i]["question_id"]);
                 });
-                divElement.appendChild(newI);
+                content_map.appendChild(newI);
                 const newB = document.createElement("button");
                 newB.classList.add("answer-button");
                 newB.onclick = () => {
@@ -436,37 +526,22 @@ async function fetchJSONQuestions() {
                 };
 
                 newB.innerHTML = "Select an Image";
-                divElement.appendChild(newB);
+                content_map.appendChild(newB);
                 const newImg = document.createElement("img");
                 newImg.id = "image_" + qa[i]["question_id"].toString();
-                divElement.appendChild(newImg);
+                content_map.appendChild(newImg);
             }
         }
     }else{
         const qa = await response;
         console.log(qa)
     }
-    if (team_name !== "Test") {
-        const map_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/maps`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({"passcode": passcode})
-        });
-        if (map_response.status === 200) {
-            console.log("MAPS:")
-            MAPS = await map_response.json();
-            console.log(MAPS)
-        } else {
-            console.log(await map_response.json())
-        }
-    }
     setTimeout(fetchJSONAnswers, 1000);
 }
 
 async function fetchJSONAnswers() {
     let a_team_name;
+    let corrections;
     if (team_name === "Admin"){
         a_team_name = selected_team;
     }else{
@@ -475,6 +550,42 @@ async function fetchJSONAnswers() {
     if (a_team_name === undefined){
         setTimeout(fetchJSONAnswers, 1000);
     }else {
+        if (team_name === "Admin"){
+            const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/correct_team`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({"passcode": passcode, "team_name": a_team_name})
+            });
+            if (response.status === 200) {
+                corrections = await response.json();
+                tot_wrong = 0;
+                tot_correct = 0;
+                tot_not_answered = 0;
+                for (let el in corrections){
+                    if (corrections[el] === false){
+                        tot_wrong += 1;
+                    }else if (corrections[el] === true){
+                        tot_correct += 1;
+                    }else{
+                        tot_not_answered += 1;
+                    }
+                }
+                let id_to_get = "counter_correct_h1";
+                let a_p = document.getElementById(id_to_get);
+                a_p.innerHTML = `Correct: ${tot_correct}/${tot_correct+tot_wrong+tot_not_answered}`
+                id_to_get = "counter_wrong_h1";
+                a_p = document.getElementById(id_to_get);
+                a_p.innerHTML = `Wrong: ${tot_wrong}/${tot_correct+tot_wrong+tot_not_answered}`
+                id_to_get = "counter_unset_h1";
+                a_p = document.getElementById(id_to_get);
+                a_p.innerHTML = `No Answer: ${tot_not_answered}/${tot_correct+tot_wrong+tot_not_answered}`
+            }else{
+                const result = await response;
+                console.log(result)
+            }
+        }
         const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/answers`, {
             method: "POST",
             headers: {
@@ -492,19 +603,31 @@ async function fetchJSONAnswers() {
                     if (input_text) {
                         input_text.value = answers[i]["answer"][answers[i]["answer"].length - 1]
                     }
+                    if (team_name === "Admin"){
+                        const id_to_get = "correction_" + answers[i]["question_id"].toString();
+                        let correction_p = document.getElementById(id_to_get);
+                        if (corrections[parseInt(answers[i]["question_id"])]) {
+                            correction_p.innerHTML = "OK!"
+                            correction_p.classList.replace("wrong_answer", "correct_answer");
+                        }else if (corrections[parseInt(answers[i]["question_id"])] === false){
+                            correction_p.innerHTML = "Wrong!"
+                            correction_p.classList.replace("correct_answer", "wrong_answer");
+                        }
+                    }
                 }
             }
         } else {
             console.log(`Error while reading answers! ${response.status}`);
         }
-        console.log(`image_questions_id.length = ${image_questions_id.length}`)
+        // console.log(`image_questions_id.length = ${image_questions_id.length}`)
         for (let i = 0; i < image_questions_id.length; i++) {
             const photo_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/photo_answers`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({"passcode": passcode, "question_id": image_questions_id[i]})
+                body: JSON.stringify({"passcode": passcode, "question_id": image_questions_id[i],
+                    "team_name": a_team_name})
             });
             const an_image = await photo_response.blob()
             if (response.status === 200) {
@@ -577,22 +700,43 @@ function draw_data(){
 
         // LET'S DRAW MAPS AREAS
         for (let i=0; i < MAPS.length; i++) {
-            ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 0.5)`;
-            ctx.beginPath();
-            for (let ii = 0; ii < MAPS[i]["lat"].length; ii++) {
-                if (ii === 0) {
-                    ctx.moveTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
-                } else {
-                    ctx.lineTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
+            if ("r" in MAPS[i]) {
+                ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 0.5)`;
+                ctx.beginPath();
+                for (let ii = 0; ii < MAPS[i]["lat"].length; ii++) {
+                    if (ii === 0) {
+                        ctx.moveTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
+                    } else {
+                        ctx.lineTo(lon_to_x(MAPS[i]["lon"][ii]), lat_to_y(MAPS[i]["lat"][ii]));
+                    }
                 }
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = `${map_name_size}px Arial`;
+                ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 1.0)`;
+                ctx.fillText(MAPS[i]["name"], lon_to_x(MAPS[i]["name_lon"]), lat_to_y(MAPS[i]["name_lat"]));
+                ctx.fillStyle = 'rgb(0,0,0, 0.8)';
+                let textMetrics = ctx.measureText(`[${i+1}]`);
+                ctx.fillRect(lon_to_x(MAPS[i]["number_lon"]),
+                    lat_to_y(MAPS[i]["number_lat"]) - textMetrics.actualBoundingBoxAscent, textMetrics.width,
+                    textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
+                ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 1.0)`;
+                ctx.fillText(`[${i+1}]`, lon_to_x(MAPS[i]["number_lon"]), lat_to_y(MAPS[i]["number_lat"]));
             }
-            ctx.closePath();
-            ctx.fill();
-            ctx.font = `${map_name_size}px Arial`;
-            ctx.fillStyle = `rgba(${MAPS[i]["r"]}, ${MAPS[i]["g"]}, ${MAPS[i]["b"]}, 1.0)`;
-            ctx.fillText(MAPS[i]["name"], lon_to_x(MAPS[i]["name_lon"]), lat_to_y(MAPS[i]["name_lat"]));
-
         }
+
+        //LET'S PRINT STARTING POINT
+        ctx.font = `15px Arial`;
+        ctx.fillStyle = 'rgb(0,0,0, 0.8)';
+        let textMetrics = ctx.measureText(`START`);
+        let start_lon = 11.289577548119677;
+        let start_lat = 44.48800060298856;
+        ctx.fillRect(lon_to_x(start_lon),
+            lat_to_y(start_lat) - textMetrics.actualBoundingBoxAscent, textMetrics.width,
+            textMetrics.actualBoundingBoxDescent + textMetrics.actualBoundingBoxAscent);
+        ctx.fillStyle = `rgba(255, 0, 0, 1.0)`;
+        ctx.fillText(`START`, lon_to_x(start_lon), lat_to_y(start_lat));
+
         // LIVE GPS
         for (let ii=0; ii<gpses_to_print.length; ii++){
             ctx.beginPath();
@@ -603,7 +747,7 @@ function draw_data(){
             const formattedDate = new Intl.DateTimeFormat('it-IT', gps_time_options).format(date);
             let text_to_show;
             if (zoom_value < (MAX_ZOOM+MIN_ZOOM)/2) {
-                text_to_show = gps_name + formattedDate
+                text_to_show = gps_name + " " + formattedDate
             }else{
                 text_to_show = gps_name
             }
@@ -833,13 +977,20 @@ async function ask_for_live_gps(){
 }
 
 function send_answer(passcode, answer_id, answer, when_was_launched){
+    let a_team_name;
+    if (team_name === "Admin"){
+        a_team_name = selected_team;
+    }else{
+        a_team_name = team_name;
+    }
     if (when_was_launched === answer_to_send[answer_id] ) {
         fetch(`${HTTPS}${SERVER_IP}:${PORT}/answer`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer})
+            body: JSON.stringify({"passcode": passcode, "answer_id": answer_id, "answer": answer,
+                "team_name": a_team_name})
         });
     }
 }

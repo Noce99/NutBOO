@@ -278,7 +278,7 @@ BOO2024_INITIALIZATION = [
     {
         "question_id": "47",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "Galadiolo",
+        "answer": "Gladiolo",
         "type_of_answer": "text"
     },
     {
@@ -319,7 +319,7 @@ BOO2024_INITIALIZATION = [
     },
     {
         "question_id": "54",
-        "question": "Quante lampadine (contando anche quelle fulminate) sulle pareti della rampa?",
+        "question": "Quante lampadine (contando anche quelle fulminate) sui lampadari dalla rampa?",
         "answer": "30",
         "type_of_answer": "text"
     },
@@ -344,7 +344,7 @@ BOO2024_INITIALIZATION = [
     {
         "question_id": "58",
         "question": "Cosa dice spiderman a batman? (con punteggiatura)",
-        "answer": "Dove si può amare ciò che si vuole?",
+        "answer": "Dove si può amare come si vuole?",
         "type_of_answer": "text"
     },
     {
@@ -353,4 +353,29 @@ BOO2024_INITIALIZATION = [
         "answer": "30",
         "type_of_answer": "text"
     },
+    {
+        "question_id": "60",
+        "question": "Di che colore ha il cappello Seba? Troverete Seba nel tratto di via Saragozza tra Porta Saragozza e il Meloncello. La sua posizione in tempo reale è indicata sulla mappa generale come \"Bonus 1\".",
+        "answer": "Rossa",
+        "type_of_answer": "text"
+    },
+    {
+        "question_id": "61",
+        "question": "Di che colore ha il cappello Noce? Noce si muoverà tra due diverse stazioni a seconda dell'orario: dalle 15:00 alle 15:30 lo troverete alla stazione Casalecchio di Reno; dalle 16:00 alle 16:30 lo troverete alla stazione Casteldebole; dalle 17:00 alle 17:30 lo troverete di nuovo alla stazione Casalecchio di Reno. La sua posizione in tempo reale è indicata sulla mappa generale come \"Bonus 2\".",
+        "answer": "Babbo Natale",
+        "type_of_answer": "text"
+    },
 ]
+
+def initialize_a_team(name, passcode):
+    a_team = {
+        "name": name,
+        "passcode": passcode,
+        "admin": False,
+        "answers": [{'question_id': f'{q["question_id"]}', 'answer': [""]} for i, q in enumerate(BOO2024_INITIALIZATION)]
+    }
+    for i, q in enumerate(BOO2024_INITIALIZATION):
+        if q["type_of_answer"] == "photo":
+            a_team["answers"][i] = {'question_id': f'{q["question_id"]}', 'answer': ["/home/ubuntu/NutBus/received_photo/BOO.jpeg"]}
+
+    return a_team

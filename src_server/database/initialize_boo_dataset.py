@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from boo2024_initialization import BOO2024_INITIALIZATION
+from boo2024_initialization import BOO2024_INITIALIZATION, initialize_a_team
 # sudo systemctl start mongod.service
 
 YEAR = "2024"
@@ -25,19 +25,48 @@ if __name__ == "__main__":
                     {"question_id": "-1", "answer": ["/home/enrico/Images/bho.jpg"]},],
     }
 
-    test_team = {
-        "name": "Team 1",
-        "passcode": "hobbit",
-        "admin": False,
-        "answers": [{'question_id': f'{i}', 'answer': [""]} for i in range(60)]
-    }
+    teams = []
+    teams.append(initialize_a_team("Noce", "hobbit"))
+    teams.append(initialize_a_team("Seba", "bilbo"))
 
-    test_team_2 = {
-        "name": "Team 2",
-        "passcode": "bilbo",
-        "admin": False,
-        "answers": [{'question_id': f'{i}', 'answer': [""]} for i in range(60)]
-    }
+    teams.append(initialize_a_team("Boh", "36tagliatelle"))
+    teams.append(initialize_a_team("BubuLoser", "36lasagne"))
+    teams.append(initialize_a_team("dis-ederati", "36passatelli"))
+    teams.append(initialize_a_team("EAE from Gatta", "36pappardelle"))
+    teams.append(initialize_a_team("Euforia", "36balanzoni"))
+    teams.append(initialize_a_team("Free walking team", "36fusilli"))
+    teams.append(initialize_a_team("Già lo sai", "36penne"))
+    teams.append(initialize_a_team("Gli Amici dello Scaldaletto", "36farfalle"))
+    teams.append(initialize_a_team("Gli sBOOssolati", "36rigatoni"))
+    teams.append(initialize_a_team("I Bradipi", "36spaghetti"))
+    teams.append(initialize_a_team("I cicis", "36bucatini"))
+    teams.append(initialize_a_team("I Padri Pellegrini (BOOmer)", "36piadine"))
+    teams.append(initialize_a_team("I salami piacentini", "36tigelle"))
+    teams.append(initialize_a_team("I Tromboni di Naim", "36crescentine"))
+    teams.append(initialize_a_team("I vagabondi", "36orecchiette"))
+    teams.append(initialize_a_team("La Crisi è al Top", "36cannelloni"))
+    teams.append(initialize_a_team("LaGangFiorentina", "36sedanini"))
+    teams.append(initialize_a_team("Lantern Hunters", "36polpette"))
+    teams.append(initialize_a_team("Le acquatrix", "36ravioli"))
+    teams.append(initialize_a_team("Le Strane", "36pagnotte"))
+    teams.append(initialize_a_team("M&M&M", "36canederli"))
+    teams.append(initialize_a_team("Mailovini", "36pizzoccheri"))
+    teams.append(initialize_a_team("Mammannapapalo", "36panigacci"))
+    teams.append(initialize_a_team("non ci resta che piangere", "36borlenghi"))
+    teams.append(initialize_a_team("Orientisti Americani", "36sfrappole"))
+    teams.append(initialize_a_team("Paradise", "36farinate"))
+    teams.append(initialize_a_team("Pia e Nino", "36brioche"))
+    teams.append(initialize_a_team("Potrebbe andare peggio", "36castagnacci"))
+    teams.append(initialize_a_team("sANTA polENTA", "36linguine"))
+    teams.append(initialize_a_team("TOP TEAM (the last dance)", "36muffin"))
+    teams.append(initialize_a_team("tt le girlz", "36crepes"))
+    teams.append(initialize_a_team("WakeMeUp", "36biscotti"))
+    teams.append(initialize_a_team("BUONA CACCIA", "36polenta"))
+
+    teams.append(initialize_a_team("Cuscinetto1", "36torrone"))
+    teams.append(initialize_a_team("Cuscinetto2", "36caramelle"))
+    teams.append(initialize_a_team("Cuscinetto3", "36liquirizia"))
+
 
     exploration_team = {
         "name": "Test",
@@ -47,8 +76,8 @@ if __name__ == "__main__":
     }
 
     teams_collection.insert_one(admin)
-    teams_collection.insert_one(test_team)
-    teams_collection.insert_one(test_team_2)
+    for team in teams:
+        teams_collection.insert_one(team)
     teams_collection.insert_one(exploration_team)
 
     # PRINT TEAMS
