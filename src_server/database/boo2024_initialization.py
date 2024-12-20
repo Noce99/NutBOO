@@ -1,217 +1,217 @@
 BOO2024_INITIALIZATION = [
     {
         "question_id": "1",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Chi abita con Gardini?",
+        "answer": "Magagnoli",
         "type_of_answer": "text"
     },
     {
         "question_id": "2",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Che aggettivo è riferito ad Amanda?",
+        "answer": "termonuclearizzata",
         "type_of_answer": "text"
     },
     {
         "question_id": "3",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "A quale comunità è fortemente legata la comunità casalecchiese?",
+        "answer": "Costaricense",
         "type_of_answer": "text"
     },
     {
         "question_id": "4",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Quante ventose sul tentacolo arancione?",
+        "answer": "6",
         "type_of_answer": "text"
     },
     {
         "question_id": "5",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Da quanti spicchi è composta la testa della fontana?",
+        "answer": "8",
         "type_of_answer": "text"
     },
     {
         "question_id": "6",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Quante vetrate (intese come intera arcata con finestre) sulla parete dell'edificio?",
+        "answer": "11",
         "type_of_answer": "text"
     },
     {
         "question_id": "7",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "Quale animale sullo sticker?",
+        "answer": "Panda",
         "type_of_answer": "text"
     },
     {
         "question_id": "8",
-        "question": "TO DO!",
-        "answer": "",
+        "question": "In quante regioni separate il labirinto suddivide la figura verde? (inclusi il cerchio centrale e la parte esterna)",
+        "answer": "7",
         "type_of_answer": "text"
     },
     {
         "question_id": "9",
-        "question": "TO DO!",
+        "question": "Selfie con il cristallo più grande",
         "answer": "",
-        "type_of_answer": "text"
+        "type_of_answer": "photo"
     },
     {
         "question_id": "10",
         "question": "G+A+U+S+S",
-        "answer": "",
+        "answer": "18",
         "type_of_answer": "text"
     },
     {
         "question_id": "11",
         "question": "F+E-R+M-A+T",
-        "answer": "",
+        "answer": "10",
         "type_of_answer": "text"
     },
     {
         "question_id": "12",
         "question": "C+A+N-T-O-R",
-        "answer": "",
+        "answer": "5",
         "type_of_answer": "text"
     },
     {
         "question_id": "13",
         "question": "L+A+G-R-A+N-G+E",
-        "answer": "",
+        "answer": "11",
         "type_of_answer": "text"
     },
     {
         "question_id": "14",
         "question": "T-A+L+E+T+E",
-        "answer": "",
+        "answer": "13",
         "type_of_answer": "text"
     },
     {
         "question_id": "15",
         "question": "R-U+F+F+I-N-I",
-        "answer": "",
+        "answer": "14",
         "type_of_answer": "text"
     },
     {
         "question_id": "16",
         "question": "E+R-O-N+E",
-        "answer": "",
+        "answer": "7",
         "type_of_answer": "text"
     },
     {
         "question_id": "17",
         "question": "E+U+L+E+R+O",
-        "answer": "",
+        "answer": "33",
         "type_of_answer": "text"
     },
     {
         "question_id": "18",
         "question": "Quale sarebbe il numero della targhetta (mancante) sull'albero al centro del cerchio?",
-        "answer": "",
+        "answer": "102329",
         "type_of_answer": "text"
     },
     {
         "question_id": "19",
         "question": "Somma dei numeri (completi) sulle tre targhette presenti dentro al cerchio",
-        "answer": "",
+        "answer": "845",
         "type_of_answer": "text"
     },
     {
         "question_id": "20",
-        "question": "Quanti denti ha la preda?",
-        "answer": "",
+        "question": "Quanti denti ha la preda del diavolo?",
+        "answer": "6",
         "type_of_answer": "text"
     },
     {
         "question_id": "21",
-        "question": "Che forma geometrica bidimensionale ha l'ombelico?",
-        "answer": "",
+        "question": "Scritta sul badge del poliziotto",
+        "answer": "PYPD",
         "type_of_answer": "text"
     },
     {
         "question_id": "22",
-        "question": "Di che colore gli occhi?",
-        "answer": "",
+        "question": "Quanti kg?",
+        "answer": "3",
         "type_of_answer": "text"
     },
     {
         "question_id": "23",
-        "question": "Foto con l'argentea figura",
+        "question": "Selfie con la figura argentata",
         "answer": "",
         "type_of_answer": "photo"
     },
     {
         "question_id": "24",
         "question": "Che tipo di odio?",
-        "answer": "",
+        "answer": "Urbano",
         "type_of_answer": "text"
     },
     {
         "question_id": "25",
         "question": "Che cosa ha sulle mani? (senza articolo, nome plurale)",
-        "answer": "",
+        "answer": "Occhi",
         "type_of_answer": "text"
     },
     {
         "question_id": "26",
         "question": "Da quanti pezzi è formata la cresta?",
-        "answer": "",
+        "answer": "3",
         "type_of_answer": "text"
     },
     {
         "question_id": "27",
-        "question": "Che cosa sputa una catena rosa? (senza articolo, nome comune)",
-        "answer": "",
+        "question": "Quale creatura sputa una catena rosa?",
+        "answer": "Serpente",
         "type_of_answer": "text"
     },
     {
         "question_id": "28",
         "question": "Quanti orecchini?",
-        "answer": "",
+        "answer": "2",
         "type_of_answer": "text"
     },
     {
         "question_id": "29",
         "question": "3 Lettere isolate, quali?",
-        "answer": "",
+        "answer": "KEW",
         "type_of_answer": "text"
     },
     {
         "question_id": "30",
-        "question": "",
-        "answer": "",
+        "question": "Quale scritta ominosa appare sulla seconda porta di questo senso unico?",
+        "answer": "Scappa stolto",
         "type_of_answer": "text"
     },
     {
         "question_id": "31",
         "question": "Scritta blu a sinistra della faccina sorridente",
-        "answer": "",
+        "answer": "Bolo",
         "type_of_answer": "text"
     },
     {
         "question_id": "32",
-        "question": "",
-        "answer": "",
-        "type_of_answer": "text"
-    },
-    {
-        "question_id": "33",
-        "question": "Scritta sullo sticker del pollo più cool del vicinato",
+        "question": "Selfie: il membro della squadra che scatta il selfie deve trovarsi al 32A, gli altri al 32B, tutti devono essere visibili!",
         "answer": "",
         "type_of_answer": "photo"
     },
     {
+        "question_id": "33",
+        "question": "Scritta sullo sticker del pollo più cool del vicinato",
+        "answer": "Polleggio",
+        "type_of_answer": "text"
+    },
+    {
         "question_id": "34",
-        "question": "",
-        "answer": "",
+        "question": "Quante lettere \"t\" rosse nei cartelli di divieto?",
+        "answer": "16",
         "type_of_answer": "text"
     },
     {
         "question_id": "35",
-        "question": "",
-        "answer": "",
+        "question": "Scritta sopra il buco che fa da bocca per il mostro",
+        "answer": "Look here",
         "type_of_answer": "text"
     },
     {
         "question_id": "36",
-        "question": "",
+        "question": "Selfie con la porta rossa in cima alla scala",
         "answer": "",
         "type_of_answer": "photo"
     },
@@ -223,134 +223,134 @@ BOO2024_INITIALIZATION = [
     },
     {
         "question_id": "38",
-        "question": "",
-        "answer": "",
+        "question": "Scritta sulla porta sopra \"zone\"",
+        "answer": "idol",
         "type_of_answer": "text"
     },
     {
         "question_id": "39",
-        "question": "",
-        "answer": "",
+        "question": "Quante teste (blocco) delle fascette ci sono attaccate al tubo di aerazione? (solo nell'angolo tra la porta e la grata)",
+        "answer": "53",
         "type_of_answer": "text"
     },
     {
         "question_id": "40",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Ciclamino",
         "type_of_answer": "text"
     },
     {
         "question_id": "41",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Tulipano",
         "type_of_answer": "text"
     },
     {
         "question_id": "42",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Garofano",
         "type_of_answer": "text"
     },
     {
         "question_id": "43",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Bucaneve",
         "type_of_answer": "text"
     },
     {
         "question_id": "44",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Peonia",
         "type_of_answer": "text"
     },
     {
         "question_id": "45",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Biancospino",
         "type_of_answer": "text"
     },
     {
         "question_id": "46",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Papavero",
         "type_of_answer": "text"
     },
     {
         "question_id": "47",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Galadiolo",
         "type_of_answer": "text"
     },
     {
         "question_id": "48",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Orchidea",
         "type_of_answer": "text"
     },
     {
         "question_id": "49",
         "question": "Di che fiore ha il nome questa barcaiuola?",
-        "answer": "",
+        "answer": "Giglio",
         "type_of_answer": "text"
     },
     {
         "question_id": "50",
-        "question": "TODO",
-        "answer": "",
+        "question": "Cosa va in buchetta oltre alle lettere?",
+        "answer": "Telegrammi",
         "type_of_answer": "text"
     },
     {
         "question_id": "51",
-        "question": "TODO",
-        "answer": "",
+        "question": "Quante rampe di scale ha la scala antincendio che si vede attraverso il cancello?",
+        "answer": "10",
         "type_of_answer": "text"
     },
     {
         "question_id": "52",
-        "question": "TODO",
-        "answer": "",
+        "question": "Da quanti semicerchi è composta la spia in laterizio di cui parla il cartello turistico?",
+        "answer": "8",
         "type_of_answer": "text"
     },
     {
         "question_id": "53",
-        "question": "TODO",
-        "answer": "",
+        "question": "Quanto costano i tortellini \"FAVOLOSI\"? (Se costassero 10.34 €/kg rispondere: \"10.34\")",
+        "answer": "32.90",
         "type_of_answer": "text"
     },
     {
         "question_id": "54",
-        "question": "TODO",
-        "answer": "",
+        "question": "Quante lampadine (contando anche quelle fulminate) sulle pareti della rampa?",
+        "answer": "30",
         "type_of_answer": "text"
     },
     {
         "question_id": "55",
-        "question": "TODO",
-        "answer": "",
+        "question": "Cosa è vietato appoggiare?",
+        "answer": "Biciclette",
         "type_of_answer": "text"
     },
     {
         "question_id": "56",
-        "question": "TODO",
-        "answer": "",
+        "question": "Quante feritoie ha la torre nello stemma sopra la porta?",
+        "answer": "27",
         "type_of_answer": "text"
     },
     {
         "question_id": "57",
-        "question": "TODO",
-        "answer": "",
+        "question": "Che mestiere fa Remo?",
+        "answer": "Tappezziere",
         "type_of_answer": "text"
     },
     {
         "question_id": "58",
-        "question": "TODO",
-        "answer": "",
+        "question": "Cosa dice spiderman a batman? (con punteggiatura)",
+        "answer": "Dove si può amare ciò che si vuole?",
         "type_of_answer": "text"
     },
     {
         "question_id": "59",
-        "question": "TODO",
-        "answer": "",
+        "question": "Quante farfalle sono già completamente uscite dal cestino del rusco?",
+        "answer": "29",
         "type_of_answer": "text"
     },
 ]

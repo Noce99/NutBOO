@@ -15,6 +15,7 @@ const HTTPS = "https://";
 const PORT = "5000";
 
 let passcode;
+let team_name;
 
 let maps_is_visible = true;
 
@@ -31,7 +32,7 @@ let width_in_km;
 let selected_bus_stop_name;
 let sizes_of_the_map;
 
-let selected_bus_stop_i = -1;
+let selected_stop = -1;
 const MIN_ZOOM = 0.00001;
 // const MAX_ZOOM =  0.001; // To see Sasso
 const MAX_ZOOM =  0.00015; // Default
@@ -42,6 +43,15 @@ const MIN_LAT = 44.464637655;
 const MAX_LAT = 44.5212535;
 let pointing_lon = 11.34310;
 let pointing_lat = 44.49375;
+
+const train_stops = [
+    {"lat": 44.47450846747514, "lon": 11.276196994362591, "name": "CASALECCHIO DI RENO"},
+    {"lat": 44.48275908146947, "lon": 11.27289656088133, "name": "CASALECCHIO GARIBALDI"},
+    {"lat": 44.50375079472428, "lon": 11.27468635485313, "name": "CASTEL DEBOLE"},
+    {"lat": 44.515036291999195, "lon": 11.284783688952498, "name": "BORGO PANIGALE"},
+    {"lat": 44.5058753612949, "lon": 11.343379184001565, "name": "BOLOGNA CENTRALE"},
+    {"lat": 44.48156522412027, "lon": 11.262735588326326, "name": "CASALECCHIO CERETOLO"}
+]
 
 const bologna_satellite = new Image;
 let bologna_satellite_loaded = false;
@@ -68,6 +78,7 @@ let image_questions_id = [];
 
 let MAPS = [];
 
+
 const gps_time_options = {
   year: 'numeric',
   month: 'numeric',
@@ -79,13 +90,21 @@ const gps_time_options = {
 
 gpses_to_print = []
 
+let selected_stop_is_a_train = false;
+let selected_team;
+
 document.addEventListener('DOMContentLoaded', function() {
     fetchJSONData();
     const url_parameters = new URLSearchParams(window.location.search);
-    let team_name = document.getElementById("team_name");
-    team_name.innerHTML = url_parameters.get("team_name")
+    let a_team_name = document.getElementById("team_name");
+    a_team_name.innerHTML = url_parameters.get("team_name")
+    team_name = url_parameters.get("team_name")
     passcode = url_parameters.get("passcode")
-    fetchJSONQuestions();
+    if (team_name === "Admin"){
+        admin_Setup();
+    }else{
+        fetchJSONQuestions();
+    }
 
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
@@ -109,7 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
     map_right = map_rect.right;
     map_bottom = map_rect.bottom;
 
-    setTimeout(ask_for_live_gps, 500);
+    if (team_name !== "Test") {
+        setTimeout(ask_for_live_gps, 500);
+    }
 
     canvas.addEventListener("click", function(event) {
         const rect = canvas.getBoundingClientRect();
@@ -128,9 +149,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 min = distance;
             }
         }
-        selected_bus_stop_name.innerHTML = data[min_i].name;
+        let minimum_distance_bus = min;
+        let minimum_distance_name = data[min_i].name;
+        let min_train = 0;
+        let min_train_i = -1
+        for (let i=0; i < train_stops.length; i++) {
+            let distance = Math.abs(lat - parseFloat(train_stops[i].lat)) + Math.abs(lon - parseFloat(train_stops[i].lon));
+            if (min_train_i === -1 || distance < min_train) {
+                min_train_i = i;
+                min_train = distance;
+            }
+        }
+        if (min_train < minimum_distance_bus){
+            minimum_distance_name = train_stops[min_train_i].name;
+            selected_bus_stop_name.style.color = 'rgb(8,197,16)';
+            selected_stop_is_a_train = true;
+            selected_stop = min_train_i;
+        }else{
+            selected_bus_stop_name.style.color = 'rgb(255,118,0)';
+            selected_stop_is_a_train = false;
+            selected_stop = min_i;
+        }
+        selected_bus_stop_name.innerHTML = minimum_distance_name;
+
         // console.log(lat.toFixed(4) + " N " + lon.toFixed(4) + " E"); // SELECTED BUS COORDINATE
-        selected_bus_stop_i = min_i;
         draw_data();
 
         ctx.beginPath();
@@ -311,8 +353,38 @@ function fetchJSONData() {
     );
 }
 
-let answer_to_send = {}
+async function admin_Setup(){
+    const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/get_teams`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"passcode": passcode})
+    });
+    if (response.status === 200) {
+        const teams_name = await response.json();
+        let divElement = document.getElementById("questions_panel");
+        const newH1 = document.createElement("h1");
+        newH1.innerHTML = "Select a team:";
+        divElement.appendChild(newH1);
+        const newSelect = document.createElement("select");
+        for (let i=0; i<teams_name.length; i++){
+            const newOption = document.createElement("option");
+            newOption.value = teams_name[i];
+            newOption.text = teams_name[i];
+            newSelect.add(newOption);
+            newSelect.addEventListener("change", function(event) {
+              selected_team = event.target.value;
+              fetchJSONAnswers();
+            });
+        }
+        selected_team = newSelect.value;
+        divElement.appendChild(newSelect);
+        fetchJSONQuestions();
+    }
+}
 
+let answer_to_send = {}
 
 async function fetchJSONQuestions() {
     const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/questions`, {
@@ -374,63 +446,76 @@ async function fetchJSONQuestions() {
         const qa = await response;
         console.log(qa)
     }
-    const map_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/maps`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({"passcode": passcode})
-    });
-    if (map_response.status === 200) {
-        console.log("MAPS:")
-        MAPS = await map_response.json();
-        console.log(MAPS)
-    }else{
-        console.log(await map_response.json())
+    if (team_name !== "Test") {
+        const map_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/maps`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({"passcode": passcode})
+        });
+        if (map_response.status === 200) {
+            console.log("MAPS:")
+            MAPS = await map_response.json();
+            console.log(MAPS)
+        } else {
+            console.log(await map_response.json())
+        }
     }
     setTimeout(fetchJSONAnswers, 1000);
 }
 
 async function fetchJSONAnswers() {
-    const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/answers`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({"passcode": passcode})
-    });
-    if (response.status === 200) {
-        const answers = await response.json();
-        console.log("Answers:", answers);
-        for (let i = 0; i < answers.length; i++) {
-            if (! image_questions_id.includes(answers[i]["question_id"].toString())){
-                const id_to_get = "answer_" + answers[i]["question_id"].toString();
-                let input_text = document.getElementById(id_to_get);
-                input_text.value = answers[i]["answer"][answers[i]["answer"].length - 1]
-            }
-        }
+    let a_team_name;
+    if (team_name === "Admin"){
+        a_team_name = selected_team;
     }else{
-        console.log(`Error while reading answers! ${response.status}`);
+        a_team_name = team_name;
     }
-    console.log(`image_questions_id.length = ${image_questions_id.length}`)
-    for (let i=0;i<image_questions_id.length;i++) {
-        const photo_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/photo_answers`, {
+    if (a_team_name === undefined){
+        setTimeout(fetchJSONAnswers, 1000);
+    }else {
+        const response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/answers`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"passcode": passcode, "question_id": image_questions_id[i]})
+            body: JSON.stringify({"passcode": passcode, "team_name": a_team_name})
         });
-        const an_image = await photo_response.blob()
         if (response.status === 200) {
-            const url = window.URL.createObjectURL(an_image);
-            const id_to_get = "image_" + image_questions_id[i];
-            document.getElementById(id_to_get).src = url;
+            const answers = await response.json();
+            console.log("Answers:", answers);
+            for (let i = 0; i < answers.length; i++) {
+                if (!image_questions_id.includes(answers[i]["question_id"].toString())) {
+                    const id_to_get = "answer_" + answers[i]["question_id"].toString();
+                    let input_text = document.getElementById(id_to_get);
+                    if (input_text) {
+                        input_text.value = answers[i]["answer"][answers[i]["answer"].length - 1]
+                    }
+                }
+            }
         } else {
-            console.log(`Error while reading photo answers! ${response.status}`);
+            console.log(`Error while reading answers! ${response.status}`);
+        }
+        console.log(`image_questions_id.length = ${image_questions_id.length}`)
+        for (let i = 0; i < image_questions_id.length; i++) {
+            const photo_response = await fetch(`${HTTPS}${SERVER_IP}:${PORT}/photo_answers`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({"passcode": passcode, "question_id": image_questions_id[i]})
+            });
+            const an_image = await photo_response.blob()
+            if (response.status === 200) {
+                const url = window.URL.createObjectURL(an_image);
+                const id_to_get = "image_" + image_questions_id[i];
+                document.getElementById(id_to_get).src = url;
+            } else {
+                console.log(`Error while reading photo answers! ${response.status}`);
+            }
         }
     }
-
 }
 
 
@@ -458,15 +543,32 @@ function draw_data(){
         }
         for (let i = 0; i < data.length; i++) {
             let radius, color;
-            if (i === selected_bus_stop_i) {
+            if (i === selected_stop && !selected_stop_is_a_train) {
                 radius = bus_stop_radius * 2;
-                color = 'rgb(197,19,213)'
+                color = 'rgb(197,19,213)';
             } else {
                 radius = bus_stop_radius;
-                color = 'rgba(255, 0, 0, 1.0)'
+                color = 'rgba(255, 0, 0, 1.0)';
             }
             ctx.beginPath();
             ctx.arc(lon_to_x(parseFloat(data[i].lon)), lat_to_y(parseFloat(data[i].lat)),
+                radius, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        for (let i = 0; i < train_stops.length; i++) {
+            let radius, color;
+            if (i === selected_stop && selected_stop_is_a_train){
+                radius = bus_stop_radius * 2.5;
+                color = 'rgb(197,19,213)';
+            }else{
+                radius = bus_stop_radius * 1.5;
+                color = 'rgb(18,223,116)';
+            }
+            ctx.beginPath();
+            ctx.arc(lon_to_x(parseFloat(train_stops[i].lon)), lat_to_y(parseFloat(train_stops[i].lat)),
                 radius, 0, 2 * Math.PI);
             ctx.closePath();
             ctx.fillStyle = color;
@@ -538,6 +640,33 @@ function draw_data(){
         width_in_km = canvas.width * zoom_value * 111.320 * Math.cos(pointing_lat);
         sizes_of_the_map.innerHTML = height_in_km.toFixed(2) + " km height " +
             width_in_km.toFixed(2) + " km width\n ";
+
+        // LEGENDA
+        ctx.beginPath();
+        ctx.lineWidth = "4";
+        ctx.strokeStyle = `rgb(4, 108, 53)`;
+        ctx.rect(0, 0, 100, 70);
+        ctx.fillStyle = `rgb(0, 0, 0)`;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(25, 20, bus_stop_maximum_radius * 1.5, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgb(18,223,116)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(25, 50, bus_stop_maximum_radius, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255, 0, 0, 1.0)';
+        ctx.fill();
+
+        ctx.font = "25px Arial";
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.fillText("Train",35,30);
+        ctx.fillText("Bus",35,60);
+
     }else{
         setTimeout(draw_data, 100);
     }

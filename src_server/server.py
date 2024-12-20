@@ -26,7 +26,7 @@ NUTBUS_FOLDER = pathlib.Path(__file__).parent.resolve().parent.resolve()
 
 MAPS = [
     {
-        "name": "1. Prologo",
+        "name": "1. Filanda",
         "name_lat": 44.478,
         "name_lon": 11.291,
         "lat": [44.48785, 44.48832, 44.48859, 44.48799, 44.48756],
@@ -66,7 +66,7 @@ MAPS = [
         "b": 0,
     },
     {
-        "name": "5. Treno",
+        "name": "5. Barcaiuole",
         "name_lat": 44.473,
         "name_lon": 11.318,
         "lat": [44.49284, 44.49535, 44.49773, 44.49754, 44.49604, 44.49280],
@@ -99,7 +99,7 @@ def get_live_gps_data():
 
     my_team = found_teams[0]
 
-    if my_team["name"] == "Exploration Team":
+    if my_team["name"] == "Test":
         return "Not Allow to see this!", 400
 
     admin = my_team["admin"]
@@ -140,7 +140,7 @@ def get_questions():
     elif len(result) > 1:
         return "To many TEAMS whit this passcode! WTF?", 400
     else:
-        if result[0]["name"] != "Exploration Team":
+        if result[0]["name"] != "Test":
             questions = list(QUESTIONS.find({"question_id": {"$nin": ["-1", "-2"]}}, {"_id": 0}))
             return jsonify(questions), 200
         else:
@@ -158,7 +158,7 @@ def get_maps():
     elif len(result) > 1:
         return "To many TEAMS whit this passcode! WTF?", 400
     else:
-        if result[0]["name"] != "Exploration Team":
+        if result[0]["name"] != "Test":
             return MAPS, 200
         else:
             return "Not allow to have this information!", 400
@@ -167,14 +167,18 @@ def get_maps():
 def get_answers():
     content = request.json
     tried_passcode = str(content["passcode"])
-    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "answers": 1}))
+    asked_team_name = str(content["team_name"])
+    result = list(TEAMS.find({"passcode": tried_passcode}, {"_id": 0, "answers": 1, "admin": 1}))
     if len(result) == 0:
         response = {"team": "Unknown"}
         print("team unknown!")
     elif len(result) > 1:
         return "To many TEAMS whit this passcode! WTF?", 400
     else:
-        response = result[0]["answers"]
+        if result[0]["admin"]:
+            response = list(TEAMS.find({"name": asked_team_name}, {"_id": 0, "answers": 1}))[0]["answers"]
+        else:
+            response = result[0]["answers"]
     return jsonify(response)
 
 @app.route('/photo_answers', methods=['POST'])
@@ -276,6 +280,23 @@ def upload_a_photo():
 
     return jsonify({'message': 'File uploaded successfully'}), 200
 
+@app.route('/get_teams', methods=['POST'])
+def get_teams_name():
+    content = request.json
+    tried_passcode = str(content["passcode"])
+    found_teams = list(TEAMS.find({"passcode": tried_passcode}))
+    if len(found_teams) == 0:
+        return "Unknown passcode", 400
+    if len(found_teams) > 1:
+        return "To many TEAMS whit this passcode! WTF?", 400
+    my_team = found_teams[0]
+    admin = my_team["admin"]
+    if admin:
+        all_teams_name = list(TEAMS.find({"admin": False}, {"name": 1, "_id": 0}))
+        names = [team["name"] for team in all_teams_name if team["name"] != "Exploration Team"]
+        return jsonify(names), 200
+    else:
+        return "Not Allow!", 400
 
 if __name__ == '__main__':
     live_gps.thread.start()

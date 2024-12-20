@@ -29,11 +29,18 @@ if __name__ == "__main__":
         "name": "Team 1",
         "passcode": "hobbit",
         "admin": False,
-        "answers": []
+        "answers": [{'question_id': f'{i}', 'answer': [""]} for i in range(60)]
+    }
+
+    test_team_2 = {
+        "name": "Team 2",
+        "passcode": "bilbo",
+        "admin": False,
+        "answers": [{'question_id': f'{i}', 'answer': [""]} for i in range(60)]
     }
 
     exploration_team = {
-        "name": "Exploration Team",
+        "name": "Test",
         "passcode": "test",
         "admin": False,
         "answers": []
@@ -41,6 +48,7 @@ if __name__ == "__main__":
 
     teams_collection.insert_one(admin)
     teams_collection.insert_one(test_team)
+    teams_collection.insert_one(test_team_2)
     teams_collection.insert_one(exploration_team)
 
     # PRINT TEAMS

@@ -14,7 +14,13 @@ stops_to_remove = ["MONTE ALBANO 11","BASILICA DI SAN LUCA","SAN LUCA 35","SAN L
                    "CAVALCAVIA MASCARELLA","STALINGRADO","DOPOLAVORO FERROVIARIO","BIGARI","JACOPO DELLA QUERCIA",
                    "MATTEOTTI ALTA VELOCITA`","CARRACCI STAZIONE AV","SACRO CUORE","TIARINI",
                    "FIORAVANTI PIAZZA LIBER P","CASA DELLA SALUTE UFF COM","CASA DELLA SALUTE NAVILE",
-                   "CARRACCI","CASE FERROVIERI"]
+                   "CARRACCI","CASE FERROVIERI", "ROTONDA REGGIMENTO PISTOI", "OCA","POSTE","SOTTOPASSO ZANARDI",
+                   "GAGARIN","GRAZIA","NAVILE","ROTONDA GOBETTI","BARBIERI","BATTIFERRO","ARCOVEGGIO CHIESA",
+                   "FONDO COMINI","FIORAVANTI","BOLOGNESE","FIORAVANTI TIBALDI","TIBALDI DALL`ARCA","ARCA","BOLOGNINA",
+                   "CA` DEI FIORI","LOMBARDI","PIAZZA DELL`UNITA`","FRANCESCHINI","CRETI","ZUCCA","LIBERAZIONE",
+                   "CIGNANI","CASARALTA","PASSAROTTI","CASONI","STALINGRADO PARRI","CALZONI","BONVICINI",
+                   "FIERA PALAZZO CONGRESSI","PARCHEGGIO COSTITUZIONE","ROTONDA REGGIMENTO PISTOI","TERRACINI",
+                   "ARIOSTO"]
 
 def from_csv_to_json(csv_path, json_path):
     pass
@@ -28,7 +34,7 @@ def process_bus_stops(csv_input_path, json_output_path):
         for bus_stop in csvFile:
             lat = float(bus_stop[6].replace(",", "."))
             lon = float(bus_stop[7].replace(",", "."))
-            if 44.47267601010103 < lat < 44.50946314343433 and 11.256635603112843 < lon < 11.365479808365757 and \
+            if 44.47755 < lat < 44.51836908725516 and 11.2610802 < lon < 11.36340139862824 and \
                 bus_stop[1] not in stops_to_remove:
                 bus_stops.append(
                     {"name": bus_stop[1], "verbal_location": bus_stop[2],
