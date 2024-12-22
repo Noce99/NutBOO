@@ -1,2 +1,2 @@
-# NutBus
-A Bologna's live bus tracker
+# BOO APP
+Bologna Orbital Orienteering App
