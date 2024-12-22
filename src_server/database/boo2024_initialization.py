@@ -127,13 +127,13 @@ BOO2024_INITIALIZATION = [
     },
     {
         "question_id": "22",
-        "question": "Quanti kg?",
+        "question": "(ANNULLATA) Quanti kg?",
         "answer": "3",
         "type_of_answer": "text"
     },
     {
         "question_id": "23",
-        "question": "Selfie con la figura argentata",
+        "question": "(ANNULLATA) Selfie con la figura argentata",
         "answer": "",
         "type_of_answer": "photo"
     },
@@ -229,7 +229,7 @@ BOO2024_INITIALIZATION = [
     },
     {
         "question_id": "39",
-        "question": "Quante teste (blocco) delle fascette ci sono attaccate al tubo di aerazione? (solo nell'angolo tra la porta e la grata)",
+        "question": "Quante teste (blocco) delle fascette ci sono attaccate al tubo di aerazione? (solo nell'angolo tra il cancello antipanico e la grata)",
         "answer": "53",
         "type_of_answer": "text"
     },
@@ -356,13 +356,13 @@ BOO2024_INITIALIZATION = [
     {
         "question_id": "60",
         "question": "Di che colore ha il cappello Seba? Troverete Seba nel tratto di via Saragozza tra Porta Saragozza e il Meloncello. La sua posizione in tempo reale è indicata sulla mappa generale come \"Bonus 1\".",
-        "answer": "Rossa",
+        "answer": "Rosso",
         "type_of_answer": "text"
     },
     {
         "question_id": "61",
         "question": "Di che colore ha il cappello Noce? Noce si muoverà tra due diverse stazioni a seconda dell'orario: dalle 15:00 alle 15:30 lo troverete alla stazione Casalecchio di Reno; dalle 16:00 alle 16:30 lo troverete alla stazione Casteldebole; dalle 17:00 alle 17:30 lo troverete di nuovo alla stazione Casalecchio di Reno. La sua posizione in tempo reale è indicata sulla mappa generale come \"Bonus 2\".",
-        "answer": "Babbo Natale",
+        "answer": "Bianco",
         "type_of_answer": "text"
     },
 ]

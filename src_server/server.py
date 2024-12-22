@@ -364,7 +364,7 @@ def get_correct_team():
         for question_id in dict_found_questions:
             if team_answers[question_id] == "":
                 result[question_id] = None
-            elif team_answers[question_id].lower() == dict_found_questions[question_id].lower():
+            elif team_answers[question_id].lower().strip() == dict_found_questions[question_id].lower().strip():
                 result[question_id] = True
             else:
                 result[question_id] = False

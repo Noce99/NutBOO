@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     teams.append(initialize_a_team("Boh", "36tagliatelle"))
     teams.append(initialize_a_team("BubuLoser", "36lasagne"))
+    teams.append(initialize_a_team("Bus Brothers", "36tortellini"))
     teams.append(initialize_a_team("dis-ederati", "36passatelli"))
     teams.append(initialize_a_team("EAE from Gatta", "36pappardelle"))
     teams.append(initialize_a_team("Euforia", "36balanzoni"))
