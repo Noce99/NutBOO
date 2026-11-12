@@ -12,3 +12,10 @@ Bologna.jpg
 .Trash-1000/
 hd_received_photo/
 received_photo/
+
+# Secrets, logs and user-uploaded photos (never commit)
+*.pem
+src_server/LOG.txt
+received_photo/
+hd_received_photo/
+src_web/Bologna_Satellite.jpg
